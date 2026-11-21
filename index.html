@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>WEISS — облік салонів (демо)</title>
+<style>
+:root{
+  --bg:#f5f5f5; --surface:#ffffff; --surface2:#f7f7f7; --ink:#0b0b0b; --muted:#797878; --line:#e8e8e8;
+  --accent:#f44548; --accent-hover:#d53537; --accent-ink:#ffffff; --accent-soft:rgba(244,69,72,.1); --gold:#797878;
+  --ok:#2e8b57; --ok-soft:#e7f4ec; --low:#c27a0e; --low-soft:#fdf2df; --crit:#d53537; --crit-soft:#fde8e8;
+  --sw-yellow:#eee2a2; --sw-grey:#c9cdd1; --sw-green:#3dbdb2; --sw-black:#1c1c1c; --sw-clear:#e2e2e2;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.05);
+  --radius:12px;
+}
+
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Rubik,"Open Sans",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3{font-family:Rubik,system-ui,sans-serif;font-weight:600;letter-spacing:-.2px;margin:0}
+h1{font-size:30px;line-height:1.15}
+h2{font-size:19px}
+h3{font-size:17px}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+
+/* ---------- login ---------- */
+.login{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr}
+.login-art{position:relative;overflow:hidden;background:#0b0b0b none center 40%/cover no-repeat;color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:space-between}
+.login-art .brand{color:#fff;width:190px}
+.login-art .brand .logo-svg{width:100%;height:auto;display:block}
+.login-art .big em{font-style:normal;color:var(--accent)}
+.login-art .big{font-size:46px;font-weight:600;line-height:1.08;letter-spacing:-.5px;max-width:520px}
+.login-art p{opacity:.85;max-width:420px}
+.login-art::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,11,11,.55) 0%,rgba(11,11,11,0) 28%,rgba(11,11,11,0) 45%,rgba(11,11,11,.82) 100%)}
+.login-art>*{position:relative}
+.login-form{display:flex;align-items:center;justify-content:center;padding:32px 16px;background:var(--bg)}
+.card-login{width:100%;max-width:380px}
+.card-login h1{margin-bottom:6px}
+.field{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.field label{font-size:13px;color:var(--muted);font-weight:500}
+.input,.select{width:100%;height:44px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:0 14px;outline:none;transition:border-color .15s}
+.input:focus,.select:focus{border-color:var(--accent)}
+.hint{margin-top:18px;padding:12px 14px;border-radius:12px;background:var(--accent-soft);font-size:13px}
+.err{color:var(--crit);font-size:13px;margin-top:10px;min-height:18px}
+
+.btn{height:42px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;transition:transform .05s,background .15s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover:not(:disabled){background:var(--accent-hover);border-color:var(--accent-hover)}
+.shine{position:relative;overflow:hidden}
+.shine:not(:disabled)::after{content:"";position:absolute;top:0;left:-60%;width:38%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);animation:shine 3.4s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%{left:-60%}55%,100%{left:135%}}
+.magnetic{transition:transform .25s cubic-bezier(.2,.8,.2,1),background .15s}
+.enter .card{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.chart rect.b{transform-box:fill-box;transform-origin:bottom;animation:barup .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes barup{from{transform:scaleY(0)}}
+.kpi .spark{display:block;width:100%;height:34px;margin-top:10px}
+.kpi .spark path.l{stroke-dasharray:400;stroke-dashoffset:400;animation:draw 1.2s .2s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.delta{display:inline-flex;align-items:center;gap:3px;font-weight:600;color:var(--ok)}
+.delta.down{color:var(--crit)}
+.split{display:flex;height:6px;border-radius:99px;overflow:hidden;background:var(--surface2);margin-top:12px}
+.split i{display:block;height:100%;transform-origin:left;animation:grow .9s .15s cubic-bezier(.2,.8,.2,1) both}
+.welcome .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:999px;margin-bottom:14px}
+.welcome p{color:var(--muted);margin:10px 0 0}
+.welcome .btn-block{height:52px;font-size:16px;margin-top:18px}
+.pw-wrap{position:relative}
+.pw-wrap .input{padding-right:48px}
+.pw-eye{position:absolute;right:6px;top:6px;width:34px;height:32px;border:0;border-radius:8px;background:transparent;cursor:pointer;font-size:16px;opacity:.6}
+.pw-eye.on{opacity:1;background:var(--accent-soft)}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-ghost{background:transparent}
+.btn-sm{height:34px;padding:0 12px;font-size:13px;border-radius:10px}
+.btn-block{width:100%;margin-top:20px;height:46px}
+
+/* ---------- app ---------- */
+.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+.side{background:var(--surface);border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.side .logo{width:150px;padding:2px 10px 0;color:var(--ink)}
+.side .logo .logo-svg{width:100%;height:auto;display:block}
+.side .logo-sub{font-size:12px;color:var(--muted);padding:0 12px 18px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink);text-decoration:none;cursor:pointer;font-weight:500}
+.nav a:hover{background:var(--surface2)}
+.nav a.active{background:var(--accent-soft);color:var(--accent)}
+.nav svg{width:18px;height:18px;flex:none}
+.nav .badge{margin-left:auto;background:var(--crit);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px;font-weight:700}
+.side-foot{margin-top:auto;padding:12px;border-top:1px solid var(--line);font-size:13px}
+.side-foot .who{font-weight:600}
+.side-foot .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+
+.main{padding:28px 32px 48px;min-width:0}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.top .sub{color:var(--muted);margin-top:4px}
+.top-r{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tabs.wh button{font-size:14px}
+.demo-chip{font-size:12px;border:1px dashed var(--line);color:var(--muted);background:var(--surface);border-radius:999px;padding:3px 10px;font-weight:600}
+
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g32{grid-template-columns:3fr 2fr}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.kpi .label{color:var(--muted);font-size:13px;font-weight:500}
+.kpi .val{font-size:32px;font-weight:600;letter-spacing:-.5px;line-height:1.15;margin-top:8px;font-variant-numeric:tabular-nums}
+.kpi .note{font-size:13px;color:var(--muted);margin-top:4px}
+.kpi.alert .val{color:var(--crit)}
+
+.tbl-wrap{overflow-x:auto;margin:0 -20px;padding:0 20px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .15s}
+tbody tr:hover td{background:var(--surface2)}
+th[data-sort]{cursor:pointer;user-select:none}
+th[data-sort]:hover{color:var(--ink)}
+th .arr{display:inline-block;margin-left:4px;color:var(--accent)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.name{display:flex;align-items:center;gap:10px;font-weight:500}
+.sw{width:14px;height:14px;border-radius:5px;flex:none;border:1px solid rgba(128,128,128,.35)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.low{background:var(--low-soft);color:var(--low)}
+.chip.crit{background:var(--crit-soft);color:var(--crit)}
+.chip.info{background:var(--accent-soft);color:var(--accent)}
+.chip.mute{background:var(--surface2);color:var(--muted);border:1px solid var(--line)}
+.bar{height:6px;border-radius:99px;background:var(--surface2);border:1px solid var(--line);overflow:hidden;min-width:80px}
+.bar i{display:block;height:100%;border-radius:99px;transform-origin:left;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+.bar i.striped{background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,.35) 0 6px,transparent 6px 12px)!important;background-size:17px 17px;animation:grow .9s cubic-bezier(.2,.8,.2,1) both,stripes 1s linear infinite}
+@keyframes grow{from{transform:scaleX(0)}}
+@keyframes stripes{to{background-position:17px 0}}
+
+.tabs{position:relative;display:flex;gap:6px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:4px;width:max-content;max-width:100%;overflow-x:auto}
+.seg-ind{position:absolute;top:4px;bottom:4px;left:0;width:0;border-radius:9px;background:var(--surface);box-shadow:var(--shadow);z-index:0}
+.seg-ind.anim{transition:left .32s cubic-bezier(.3,1.3,.5,1),width .32s cubic-bezier(.3,1.3,.5,1)}
+.tabs button{position:relative;z-index:1;border:0;background:transparent;transition:color .2s;padding:7px 14px;border-radius:9px;cursor:pointer;font-weight:600;color:var(--muted);white-space:nowrap}
+.tabs button.on{color:var(--ink)}
+.toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap}
+.search{max-width:280px}
+
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:none}
+.li .grow{flex:1;min-width:0}
+.li .t{font-weight:500}
+.li .s{font-size:13px;color:var(--muted)}
+.ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}
+.ico svg{width:17px;height:17px}
+
+.qty{display:flex;align-items:center;gap:6px}
+.qty .input{text-align:center;width:110px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.formula{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface2);font-size:13px;font-weight:500}
+.plus{color:var(--muted);font-weight:700}
+.summary{margin-top:16px;padding:14px 16px;border-radius:12px;font-size:14px}
+.summary.ok{background:var(--ok-soft)}
+.summary.bad{background:var(--crit-soft)}
+
+.chart{width:100%;height:190px;display:block}
+.toast{position:fixed;right:24px;bottom:24px;max-width:440px;display:flex;align-items:flex-start;gap:12px;overflow:hidden;background:var(--ink);color:var(--bg);padding:14px 16px 16px 18px;border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.25);font-size:14px;z-index:50;transform:translateY(20px);opacity:0;transition:all .25s}
+.toast.show{transform:none;opacity:1}
+.toast .t-msg{flex:1}
+.toast .t-act{flex:none;border:0;border-radius:9px;padding:5px 10px;background:var(--accent);color:#fff;font-weight:600;font-size:13px;cursor:pointer}
+.toast .t-bar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--accent);transform-origin:left}
+.toast.show .t-bar{animation:shrink var(--dur,4.2s) linear both}
+@keyframes shrink{to{transform:scaleX(0)}}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.spec{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
+.spec .card h3{margin-bottom:8px}
+.g-input{width:84px;height:34px;text-align:right;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:0 8px}
+
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g32{grid-template-columns:1fr}.spec{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .login{grid-template-columns:1fr}.login-art{min-height:260px;padding:28px 16px}.login-art .big{font-size:32px}
+  .app{grid-template-columns:1fr}
+  .side{position:sticky;height:auto;flex-direction:row;align-items:center;padding:10px 16px;gap:8px;overflow-x:auto;z-index:5;border-right:0;border-bottom:1px solid var(--line)}
+  .side .logo{width:150px;flex:none;padding:0;margin:-14px 0 -14px -14px}.side .logo-sub,.side-foot{display:none}
+  .nav{display:flex;gap:4px}.nav a{padding:8px 10px;white-space:nowrap}.nav a span.lbl{display:none}.nav a.active span.lbl{display:inline}
+  .main{padding:20px 16px 40px}
+  .g2{grid-template-columns:1fr}
+  h1{font-size:28px}
+}
+.combo{position:relative}
+.combo-ico{position:absolute;left:14px;top:11px;color:var(--muted);font-size:17px;pointer-events:none}
+.combo .combo-in{padding-left:38px}
+.combo-list{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:15;max-height:min(360px,55vh);overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.14);padding:6px;animation:rise .18s ease-out}
+.combo-g{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:8px 10px 4px}
+.combo-opt{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;text-align:left;padding:10px;border-radius:9px;cursor:pointer;font-weight:500}
+.combo-opt:hover,.combo-opt.hl{background:var(--surface2)}
+.combo-opt.sel .combo-n{color:var(--accent)}
+.combo-n{flex:1;min-width:0}
+.combo-note{font-size:12px;color:var(--muted);white-space:nowrap}
+.combo-empty{padding:14px;color:var(--muted);font-size:14px}
+.reasons{display:flex;flex-wrap:wrap;gap:8px}
+.reasons .btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+a.link{color:var(--accent);font-weight:600;cursor:pointer;text-decoration:none}
+a.link:hover{text-decoration:underline}
+.sname{font-size:12px;color:var(--muted);font-weight:400;margin-top:2px;line-height:1.35}
+.combo-n small{display:block;font-size:11.5px;color:var(--muted);font-weight:400;margin-top:1px;line-height:1.3}
+.row-act{display:inline-flex;gap:6px;justify-content:flex-end}
+.tools-r{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sup-card{margin-bottom:16px}
+.modal-bg:not(.hidden){position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.4);animation:fadeIn .2s}
+.modal:not(.hidden){position:fixed;z-index:41;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 48px);overflow-y:auto;background:var(--surface);border-radius:18px;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:pop .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes fadeIn{from{opacity:0}}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-46%) scale(.97)}}
+.modal .tabs{width:100%}.modal .tabs button{flex:1}
+.modal .tabs button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.m-act{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.w-diff{margin-top:10px;font-size:14px}
+.w-diff.bad{color:var(--crit);font-weight:600}
+.bnav,.sheet,.sheet-bg{display:none}
+@media (max-width:860px){
+  .side .nav{display:none}
+  .side{justify-content:space-between}
+  .main{padding:18px 16px calc(96px + env(safe-area-inset-bottom))}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  .bnav a{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:12px;color:var(--muted);font-size:11px;font-weight:600;text-decoration:none;cursor:pointer}
+  .bnav a svg{width:22px;height:22px}
+  .bnav a.active{color:var(--accent);background:var(--accent-soft)}
+  .bnav .dot{position:absolute;top:2px;right:calc(50% - 20px);background:var(--crit);color:#fff;border-radius:999px;font-size:10px;font-style:normal;padding:0 5px;line-height:16px}
+  .sheet-bg:not(.hidden){display:block;position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.35)}
+  .sheet:not(.hidden){display:block;position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--surface);border-radius:20px 20px 0 0;padding:8px 12px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -12px 32px rgba(0,0,0,.2);animation:sheetUp .25s cubic-bezier(.2,.8,.2,1)}
+  @keyframes sheetUp{from{transform:translateY(100%)}}
+  .sheet-h{width:40px;height:4px;border-radius:99px;background:var(--line);margin:4px auto 10px}
+  .sheet a{display:flex;align-items:center;gap:14px;padding:14px 12px;border-radius:12px;color:var(--ink);font-weight:500;cursor:pointer;text-decoration:none}
+  .sheet a.active{background:var(--accent-soft);color:var(--accent)}
+  .sheet a svg{width:20px;height:20px}
+  .sheet .badge{margin-left:auto;background:var(--crit);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px;font-weight:700}
+  .sheet-sep{height:1px;background:var(--line);margin:6px 0}
+  .toast{left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:none}
+  .input,.select{font-size:16px}
+  .top{margin-bottom:16px}
+  .top-r{width:100%}
+  .tabs.wh{width:100%}.tabs.wh button{flex:1}
+  .demo-chip{display:none}
+}
+@media (max-width:640px){
+  .m-grid{grid-template-columns:1fr}
+  .modal:not(.hidden){top:auto;bottom:0;left:0;right:0;transform:none;width:100%;max-height:88vh;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));animation:sheetUp .25s cubic-bezier(.2,.8,.2,1)}
+  .m-act .btn{flex:1}
+  .modal:not(.hidden) ~ .toast{top:calc(12px + env(safe-area-inset-top));bottom:auto}
+  .tools-r{width:100%}.tools-r .btn{width:100%}
+  .sup-card .card-h{flex-direction:column;align-items:stretch}
+  .tbl-wrap{margin:0;padding:0;overflow:visible}
+  .tbl-wrap table,.tbl-wrap tbody,.tbl-wrap tr,.tbl-wrap td{display:block;width:100%}
+  .tbl-wrap thead{display:none}
+  .tbl-wrap tr{padding:12px 0;border-bottom:1px solid var(--line)}
+  .tbl-wrap tr:last-child{border-bottom:0}
+  .tbl-wrap td{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:4px 0;border:0;text-align:right;white-space:normal}
+  .tbl-wrap td::before{content:attr(data-label);color:var(--muted);font-size:12px;font-weight:500;text-align:left;flex:none}
+  .tbl-wrap td:first-child{justify-content:flex-start;text-align:left;padding-bottom:8px;font-size:15px}
+  .tbl-wrap td:first-child::before,.tbl-wrap td[data-label=""]::before{display:none}
+  .tbl-wrap td[data-label=""]{justify-content:flex-end;padding-top:8px}
+  .tbl-wrap td .bar{flex:1;max-width:60%}
+  tbody tr:hover td{background:none}
+  .toolbar .search{max-width:none;width:100%}
+}
+@media (max-width:520px){.g4{grid-template-columns:1fr 1fr}.kpi .val{font-size:28px}.grid{gap:12px}.card{padding:16px}}
+
+/* ---------- WEISS ---------- */
+:root,:root[data-theme="dark"]{--bg:#fdf5f8;--surface:#ffffff;--surface2:#fcf0f4;--ink:#2b1a21;--muted:#8d7480;--line:#f3dbe4;--accent:#d14d7e;--accent-hover:#b83d6b;--accent-ink:#ffffff;--accent-soft:rgba(209,77,126,.10);--gold:#8d7480;--ok:#2e8b57;--ok-soft:#e7f4ec;--low:#c27a0e;--low-soft:#fdf2df;--crit:#d53537;--crit-soft:#fde8e8;--sw-clear:#e2e2e2;--shadow:0 1px 2px rgba(150,40,80,.05),0 8px 24px rgba(150,40,80,.07);color-scheme:light}
+@media (prefers-color-scheme: dark){:root{--bg:#fdf5f8;--surface:#ffffff;--surface2:#fcf0f4;--ink:#2b1a21;--muted:#8d7480;--line:#f3dbe4;--accent:#d14d7e;--accent-hover:#b83d6b;--accent-ink:#ffffff;--accent-soft:rgba(209,77,126,.10);--gold:#8d7480;--ok:#2e8b57;--ok-soft:#e7f4ec;--low:#c27a0e;--low-soft:#fdf2df;--crit:#d53537;--crit-soft:#fde8e8;--sw-clear:#e2e2e2;--shadow:0 1px 2px rgba(150,40,80,.05),0 8px 24px rgba(150,40,80,.07);color-scheme:light}}
+.login-art .big em{color:#fff!important;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px}
+.login-art p{text-shadow:0 1px 2px rgba(120,20,60,.25)}
+.side .logo.wordmark{color:var(--accent)}
+.login-art{background:linear-gradient(165deg,#a8325e 0%,#c94b78 30%,#e0709a 62%,#f2a7c1 100%)!important}
+.login-art::before{background:linear-gradient(180deg,rgba(80,15,40,.45) 0%,rgba(80,15,40,0) 30%,rgba(80,15,40,0) 55%,rgba(80,15,40,.55) 100%)!important}
+.wordmark{font-family:"Cormorant Garamond","Playfair Display",Georgia,serif;font-weight:600;letter-spacing:.32em;font-size:34px;line-height:1}
+.wordmark small{display:block;font-family:Rubik,system-ui,sans-serif;font-size:11px;letter-spacing:.42em;font-weight:500;margin-top:8px;opacity:.75}
+.login-art .wordmark{font-size:44px;color:#fff;text-shadow:0 1px 3px rgba(150,40,80,.25)}.login-art .wordmark small{opacity:1}
+.side .logo.wordmark{width:auto;font-size:26px;padding:4px 12px 0}
+.minis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.minis .label{font-size:12px;color:var(--muted)}
+.minis b{font-size:18px;font-variant-numeric:tabular-nums}
+.sumrow{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
+.ava{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:700;flex:none;color:#fff;letter-spacing:.3px}
+.reasons .btn .ava{width:24px;height:24px;font-size:10px;margin-left:-6px}
+.c-nails{background:#d9638e}.c-hair{background:#b5708a}.c-lash{background:#9b5a7e}.c-makeup{background:#e08aa6}
+tr.tot td{border-top:2px solid var(--line);background:var(--surface2)}
+.demo-logins{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.alerts{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.alert-li{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;background:var(--accent-soft);font-size:14px}
+.alert-li svg{width:18px;height:18px;flex:none;color:var(--accent)}.alert-li span{flex:1}
+.nav .badge.soft{background:var(--accent-soft);color:var(--accent)}
+details.mats{margin-top:14px}details.mats summary{cursor:pointer;color:var(--muted);font-size:14px;font-weight:500}
+.check{display:flex;gap:10px;align-items:center;font-size:14px;margin-top:14px;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.hint a{color:inherit}
+.lines{display:flex;flex-direction:column;gap:8px}
+.line-row{display:flex;gap:8px;align-items:center}
+.line-row .select{flex:1}
+.row-act{display:flex;gap:6px;justify-content:flex-end}
+button:disabled{opacity:.5;cursor:not-allowed}
+@media (max-width:860px){.minis{grid-template-columns:1fr 1fr}.side .logo.wordmark{font-size:20px;margin:0}}
+</style>
+</head>
+<body>
+<section id="login" class="login">
+  <div class="login-art">
+    <div class="brand wordmark">WEISS<small>BEAUTY SALON</small></div>
+    <div>
+      <div class="big">Салон як на долоні<br><em>Wałbrzych і Świdnica</em></div>
+      <p>Замість зошита: кожна майстриня записує свої візити, зарплата й аванси рахуються самі, а власниця бачить обидва салони з телефона.</p>
+    </div>
+  </div>
+  <div class="login-form">
+    <form class="card-login welcome" id="loginForm" autocomplete="off" novalidate>
+      <span class="eyebrow">Демо-версія</span>
+      <h1>Вхід у систему</h1>
+      <p>Облік салонів WEISS</p>
+      <div class="field"><label for="lg">Логін</label>
+        <input class="input" id="lg" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Введіть логін"></div>
+      <div class="field"><label for="pw">Пароль</label>
+        <div class="pw-wrap"><input class="input" id="pw" type="password" placeholder="Введіть пароль">
+        <button class="pw-eye" type="button" id="pwEye" aria-label="Показати пароль">👁</button></div></div>
+      <div class="err" id="lgErr" role="alert"></div>
+      <button class="btn btn-primary btn-block shine magnetic" id="loginBtn" type="submit">Увійти →</button>
+      <div class="hint">Демо: пароль у всіх <b>2026</b>. Увійти як:
+        <div class="demo-logins"><button type="button" class="btn btn-sm" data-demo="anastasia">Анастасія — власниця</button><button type="button" class="btn btn-sm" data-demo="admin">Адміністратор</button><button type="button" class="btn btn-sm" data-demo="viktoria">Вікторія — майстриня</button></div>
+        Усі цифри в демо — приклад, не справжні.</div>
+    </form>
+  </div>
+</section>
+<section id="app" class="app hidden">
+  <aside class="side">
+    <div class="logo wordmark">WEISS<small>BEAUTY SALON</small></div>
+    <div class="logo-sub" style="padding-top:14px">Облік салонів</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <div class="who" id="who"></div>
+      <div class="muted" id="whoSub"></div>
+      <div class="row">
+        <button class="btn btn-sm" id="resetBtn" title="Повернути приклади цифр">Скинути демо</button>
+        <button class="btn btn-sm btn-ghost" data-logout="1">Вийти</button>
+      </div>
+    </div>
+  </aside>
+  <main class="main" id="view"></main>
+  <nav class="bnav" id="bnav"></nav>
+  <div class="sheet-bg hidden" id="sheetBg"></div>
+  <div class="sheet hidden" id="sheet"></div>
+</section>
+<div class="modal-bg hidden" id="modalBg"></div>
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast"><div class="t-msg"></div><i class="t-bar"></i></div>
+<script>
+/* =========================================================
+   WEISS Beauty Salon — демо системи обліку для двох салонів.
+   Замість зошита: кожна майстриня вносить свої візити, зарплата рахується сама, аванси з каси,
+   база клієнтів з нагадуванням «давно не були», «Треба купити», каса салону, склад.
+   Ролі: власниця (бачить усе), адміністратор (без зарплат), майстриня (тільки своє).
+   Усе зберігається в браузері (localStorage). «Скинути демо» повертає приклад.
+   ========================================================= */
+const KEY = 'weiss-demo-v6';
+const SALONS = {
+  wb: {name: 'Wałbrzych', addr: ''},
+  sw: {name: 'Świdnica', addr: 'ul. Pułaskiego 22'}
+};
+const CUR = 'zł';
+const CATS = {
+  nails: {name: 'Манікюр і педикюр', short: 'Нігті'},
+  hair: {name: 'Перукарня', short: 'Волосся'},
+  lash: {name: 'Вії та брови', short: 'Вії, брови'},
+  makeup: {name: 'Макіяж', short: 'Макіяж'},
+  common: {name: 'Загальне', short: 'Загальне'}
+};
+const PAYS = {card: 'Картка', cash: 'Готівка', blik: 'BLIK'};
+const SOURCES = {street: 'Вивіска / з вулиці', booksy: 'Booksy', social: 'Instagram / Facebook', ref: 'За рекомендацією', regular: 'Постійний клієнт'};
+const CALLRES = {booked: 'Записалась', later: 'Передзвонити пізніше', noanswer: 'Не відповіла', no: 'Не хоче'};
+const ROLES = {owner: 'Власниця', admin: 'Адміністратор', master: 'Майстриня'};
+
+/* ---------- приклад даних ---------- */
+function seedItems() {
+  const L = (id, cat, name, unit, size, price, sup) => ({id, cat, name, unit, pack: {size, price}, sup});
+  return [
+    L('base', 'nails', 'База каучукова', 'мл', 15, 49, 'Kodi Professional'),
+    L('top', 'nails', 'Топ без липкого шару', 'мл', 15, 49, 'Kodi Professional'),
+    L('color', 'nails', 'Гель-лаки кольорові', 'мл', 10, 29, 'Kodi Professional'),
+    L('build', 'nails', 'Гель будівельний', 'г', 50, 89, 'Kodi Professional'),
+    L('cleaner', 'nails', 'Знежирювач', 'мл', 500, 39, 'Indigo Nails'),
+    L('remover', 'nails', 'Ремувер для гібриду', 'мл', 500, 35, 'Indigo Nails'),
+    L('file', 'nails', 'Пилки одноразові', 'шт', 50, 45, 'Indigo Nails'),
+    L('buff', 'nails', 'Бафи одноразові', 'шт', 50, 40, 'Indigo Nails'),
+    L('forms', 'nails', 'Форми для нарощення', 'шт', 300, 25, 'Indigo Nails'),
+    L('pdisc', 'nails', 'Педикюрні диски змінні', 'шт', 50, 55, 'Indigo Nails'),
+    L('cream', 'nails', 'Крем для рук і ніг', 'мл', 500, 60, 'Indigo Nails'),
+    L('shamp', 'hair', 'Шампунь професійний', 'мл', 1000, 85, 'Hurtownia Fryzjerska Kaleta'),
+    L('cond', 'hair', 'Кондиціонер', 'мл', 1000, 90, 'Hurtownia Fryzjerska Kaleta'),
+    L('mask', 'hair', 'Маска для волосся', 'мл', 500, 95, 'Hurtownia Fryzjerska Kaleta'),
+    L('dye', 'hair', 'Фарба для волосся', 'г', 60, 32, 'Hurtownia Fryzjerska Kaleta'),
+    L('oxi', 'hair', 'Оксидант', 'мл', 1000, 45, 'Hurtownia Fryzjerska Kaleta'),
+    L('bleach', 'hair', 'Освітлювач', 'г', 500, 120, 'Hurtownia Fryzjerska Kaleta'),
+    L('styl', 'hair', 'Засіб для укладки', 'мл', 250, 55, 'Hurtownia Fryzjerska Kaleta'),
+    L('spray', 'hair', 'Лак для волосся', 'мл', 500, 45, 'Hurtownia Fryzjerska Kaleta'),
+    L('wax', 'hair', 'Віск для волосся', 'г', 100, 40, 'Hurtownia Fryzjerska Kaleta'),
+    L('lashes', 'lash', 'Вії для нарощення', 'лоток', 1, 45, 'Lash Store PL'),
+    L('lglue', 'lash', 'Клей для вій', 'мл', 5, 79, 'Lash Store PL'),
+    L('primer', 'lash', 'Праймер', 'мл', 15, 35, 'Lash Store PL'),
+    L('patch', 'lash', 'Патчі під очі', 'пара', 50, 30, 'Lash Store PL'),
+    L('brush', 'lash', 'Мікробраші', 'шт', 100, 15, 'Lash Store PL'),
+    L('lami', 'lash', 'Склад для ламінування', 'саше', 10, 120, 'Lash Store PL'),
+    L('tint', 'lash', 'Фарба для вій і брів', 'г', 15, 35, 'Lash Store PL'),
+    L('found', 'makeup', 'Тональна основа', 'мл', 30, 89, 'Douglas Professional'),
+    L('powder', 'makeup', 'Пудра', 'г', 10, 69, 'Douglas Professional'),
+    L('sponge', 'makeup', 'Спонжі', 'шт', 10, 30, 'Douglas Professional'),
+    L('applic', 'makeup', 'Аплікатори одноразові', 'шт', 100, 25, 'Douglas Professional'),
+    L('flash', 'makeup', 'Накладні вії', 'пара', 10, 60, 'Douglas Professional'),
+    L('gloves', 'common', 'Рукавички нітрилові', 'пара', 50, 25, 'Medi-Hurt'),
+    L('wipes', 'common', 'Серветки безворсові', 'шт', 1000, 30, 'Medi-Hurt'),
+    L('foil', 'common', 'Фольга (листи)', 'шт', 500, 35, 'Medi-Hurt'),
+    L('collar', 'common', 'Комірці одноразові', 'шт', 100, 30, 'Medi-Hurt'),
+    L('towel', 'common', 'Рушники одноразові', 'шт', 100, 39, 'Medi-Hurt')
+  ];
+}
+// remind — через скільки днів без візиту нагадати «давно не була» (0 — не нагадувати)
+function seedServices() {
+  const S = (id, cat, name, price, min, remind, mats) => ({id, cat, name, price, min, remind, mats: Object.entries(mats).map(([item, q]) => ({item, q}))});
+  return [
+    S('man_h', 'nails', 'Манікюр гібридний', 130, 90, 28, {base: .4, top: .3, color: .5, cleaner: 3, file: 1, buff: 1, gloves: 1, wipes: 6}),
+    S('man_rh', 'nails', 'Зняття + манікюр гібридний', 150, 105, 28, {remover: 6, foil: 10, base: .4, top: .3, color: .5, cleaner: 3, file: 1, buff: 1, gloves: 1, wipes: 8}),
+    S('man_ext', 'nails', 'Нарощення нігтів (гель)', 220, 150, 28, {build: 3, base: .4, top: .3, color: .5, forms: 10, cleaner: 4, file: 2, buff: 1, gloves: 1, wipes: 8}),
+    S('man_cl', 'nails', 'Манікюр класичний', 70, 45, 28, {file: 1, buff: 1, cream: 3, gloves: 1}),
+    S('ped_h', 'nails', 'Педикюр гібридний', 170, 90, 35, {base: .5, top: .4, color: .6, pdisc: 2, cream: 5, cleaner: 3, gloves: 1, wipes: 6, towel: 1}),
+    S('hair_w', 'hair', 'Стрижка жіноча', 120, 60, 45, {shamp: 15, cond: 10, styl: 5, collar: 1, towel: 1}),
+    S('hair_m', 'hair', 'Стрижка чоловіча', 70, 40, 45, {shamp: 10, wax: 3, collar: 1, towel: 1}),
+    S('hair_col', 'hair', 'Фарбування в один тон', 260, 120, 45, {dye: 60, oxi: 90, shamp: 15, mask: 15, gloves: 1, collar: 1, towel: 1}),
+    S('hair_hl', 'hair', 'Мелірування / балаяж', 450, 210, 60, {bleach: 40, oxi: 80, dye: 30, foil: 40, shamp: 20, mask: 20, gloves: 2, collar: 1, towel: 1}),
+    S('hair_sty', 'hair', 'Укладка', 90, 45, 0, {shamp: 15, styl: 8, spray: 5, towel: 1}),
+    S('lash_cl', 'lash', 'Нарощення вій — класика', 160, 120, 21, {lashes: .25, lglue: .3, primer: .5, patch: 1, brush: 2}),
+    S('lash_2d', 'lash', 'Нарощення вій 2D–3D', 200, 150, 21, {lashes: .4, lglue: .4, primer: .5, patch: 1, brush: 2}),
+    S('lash_lam', 'lash', 'Ламінування вій', 150, 60, 42, {lami: 1, tint: .5, patch: 1, brush: 2}),
+    S('brow', 'lash', 'Корекція та фарбування брів', 80, 40, 28, {tint: .3, brush: 2, wipes: 2}),
+    S('mk_day', 'makeup', 'Макіяж денний', 180, 60, 0, {found: 1, powder: .3, sponge: 1, applic: 3, wipes: 2}),
+    S('mk_ev', 'makeup', 'Макіяж вечірній / весільний', 300, 90, 0, {found: 1.5, powder: .5, flash: 1, sponge: 1, applic: 4, wipes: 3})
+  ];
+}
+function seedMasters() {
+  const M = (id, login, salon, name, cat, svcs) => ({id, login, salon, name, cat, pct: 40, svcs});
+  const N = ['man_h', 'man_rh', 'man_ext', 'man_cl', 'ped_h'], H = ['hair_w', 'hair_m', 'hair_col', 'hair_hl', 'hair_sty'], L = ['lash_cl', 'lash_2d', 'lash_lam', 'brow'];
+  return [
+    Object.assign(M('m0', 'anastasia', 'wb', 'Анастасія', 'nails', N), {pct: 0, owner: true}),
+    Object.assign(M('m1', 'viktoria', 'wb', 'Вікторія', 'nails', N), {title: 'Манікюр, педикюр'}),
+    Object.assign(M('m2', 'valya', 'wb', 'Валя', 'nails', N.concat(['lash_cl', 'lash_2d'])), {title: 'Манікюр, педикюр, вії'}),
+    Object.assign(M('m3', 'lena', 'wb', 'Лена', 'hair', ['hair_w', 'hair_m', 'hair_sty']), {title: 'Стрижки жіночі й чоловічі'}),
+    Object.assign(M('m4', 'olya', 'wb', 'Оля', 'hair', ['hair_col', 'hair_hl', 'hair_w', 'hair_sty']), {title: 'Фарбування, стрижка жіноча'}),
+    Object.assign(M('m5', 'karyna', 'wb', 'Карина', 'nails', N), {title: 'Манікюр, педикюр'}),
+    M('m7', 'natalia', 'sw', 'Наталія Ткач', 'nails', N),
+    M('m8', 'magda', 'sw', 'Magda Wójcik', 'nails', N),
+    M('m9', 'sofia', 'sw', 'Софія Кравець', 'hair', H),
+    M('m10', 'pawel', 'sw', 'Paweł Zieliński', 'hair', ['hair_m', 'hair_w']),
+    M('m11', 'daryna', 'sw', 'Дарина Олійник', 'lash', L)
+  ];
+}
+const FIRST_UA = ['Анна', 'Марія', 'Ольга', 'Юлія', 'Тетяна', 'Ірина', 'Оксана', 'Світлана', 'Дарія', 'Олександра', 'Христина', 'Яна', 'Людмила', 'Вероніка', 'Аліна', 'Катерина', 'Галина', 'Наталія', 'Інна', 'Віра'];
+const FIRST_PL = ['Joanna', 'Katarzyna', 'Natalia', 'Ewa', 'Monika', 'Aleksandra', 'Magdalena', 'Agata', 'Karolina', 'Paulina', 'Weronika', 'Zuzanna', 'Barbara', 'Dominika', 'Patrycja', 'Sylwia', 'Justyna', 'Martyna', 'Anna', 'Julia'];
+const MEN_UA = ['Андрій', 'Олег', 'Дмитро', 'Ігор', 'Сергій'], MEN_PL = ['Piotr', 'Tomasz', 'Michał', 'Krzysztof', 'Jakub', 'Marcin', 'Paweł', 'Łukasz'];
+function personName(R, men) {
+  const pl = R() < .55, pool = men ? (pl ? MEN_PL : MEN_UA) : (pl ? FIRST_PL : FIRST_UA);
+  const L = pl ? 'ABCDGKLMNPRSTWZ' : 'АБВГДКЛМНОПРСТШ';
+  return pool[Math.floor(R() * pool.length)] + ' ' + L[Math.floor(R() * L.length)] + '.';
+}
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function linesFor(svc) { return svc.mats.map(m => ({item: m.item, q: m.q})); }
+const dayAt = (ago, h, m = 0) => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate() - ago, h, m); };
+
+function freshState() {
+  const R = rng(20261121), items = seedItems(), services = seedServices(), masters = seedMasters();
+  const svc = id => services.find(s => s.id === id);
+  const users = [{login: 'anastasia', name: 'Анастасія', role: 'owner', master: 'm0'}, {login: 'admin', name: 'Юлія (адміністратор)', role: 'admin'}]
+    .concat(masters.filter(m => !m.owner).map(m => ({login: m.login, name: m.name, role: 'master', master: m.id})));
+  const clients = [], cid = {n: 1};
+  const newClient = (salon, men, src, ts) => {
+    const c = {id: 'c' + cid.n++, salon, name: personName(R, men), phone: '5' + String(Math.floor(R() * 1e8)).padStart(8, '0'), src, created: ts};
+    clients.push(c); return c;
+  };
+  // постійні клієнти кожного салону (прийшли раніше, ніж 2 місяці тому)
+  const regs = {}, regMen = {};
+  Object.keys(SALONS).forEach(s => {
+    regs[s] = Array.from({length: s === 'sw' ? 150 : 120}, () => newClient(s, false, ['booksy', 'street', 'social', 'ref'][Math.floor(R() * 4)], dayAt(120 + Math.floor(R() * 300), 12).toISOString()));
+    regMen[s] = Array.from({length: 45}, () => newClient(s, true, ['booksy', 'street', 'ref'][Math.floor(R() * 3)], dayAt(120 + Math.floor(R() * 300), 12).toISOString()));
+  });
+  const visits = [], now = new Date();
+  let vid = 1;
+  const perDay = {nails: [4, 6], hair: [4, 7], lash: [3, 4], makeup: [1, 3]};
+  const weights = {man_h: 6, man_rh: 5, man_ext: 2, man_cl: 1, ped_h: 3, hair_w: 5, hair_m: 4, hair_col: 3, hair_hl: 1, hair_sty: 2,
+    lash_cl: 3, lash_2d: 4, lash_lam: 2, brow: 3, mk_day: 3, mk_ev: 2};
+  const seen = new Set();
+  for (let ago = 62; ago >= 0; ago--) {
+    const d = dayAt(ago, 0);
+    if (d.getDay() === 0) continue;
+    masters.forEach(m => {
+      if (R() < (m.owner ? 0.5 : 0.17)) return;
+      const [a, b] = m.owner ? [1, 3] : m.id === 'm10' ? [6, 9] : perDay[m.cat];
+      let n = a + Math.floor(R() * (b - a + 1)); if (d.getDay() === 6) n = Math.max(1, n - 2);
+      let t = 9 * 60 + Math.floor(R() * 4) * 15;
+      for (let k = 0; k < n; k++) {
+        const pool = m.svcs.flatMap(s => Array(weights[s] || 1).fill(s));
+        const s = svc(pool[Math.floor(R() * pool.length)]);
+        const ts = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(t / 60), t % 60);
+        if (ts > now) break;
+        const men = s.id === 'hair_m';
+        let c;
+        if (R() < .72) { const r = (men ? regMen : regs)[m.salon]; c = r[Math.floor(R() * r.length)]; }
+        else c = newClient(m.salon, men, R() < .45 ? 'booksy' : R() < .4 ? 'street' : R() < .55 ? 'social' : 'ref', ts.toISOString());
+        const src = seen.has(c.id) || new Date(c.created) < ts - 864e5 ? 'regular' : c.src;
+        seen.add(c.id);
+        const extra = s.cat === 'nails' && R() < 0.25 ? [10, 20, 30][Math.floor(R() * 3)] : 0;
+        const disc = R() < .05 ? 30 : 0;
+        visits.push({id: 'v' + vid++, salon: m.salon, master: m.id, svcs: [s.id], client: c.id, src,
+          price: s.price + extra - disc, pay: R() < .55 ? 'card' : R() < .6 ? 'cash' : 'blik', note: disc ? 'Знижковий талон −30 zł' : '',
+          ts: ts.toISOString(), by: m.login, lines: linesFor(s), hist: []});
+        t += s.min + 15 + Math.floor(R() * 3) * 15;
+        if (t > 19 * 60) break;
+      }
+    });
+  }
+  // приклад виправлення: дівчинка помилилась у сумі й виправила того ж дня
+  const fix = visits.filter(v => v.master === 'm1').slice(-4)[0];
+  if (fix) { fix.hist.push({ts: new Date(new Date(fix.ts).getTime() + 40 * 6e4).toISOString(), by: 'viktoria', from: {price: fix.price + 100, pay: fix.pay, note: ''}, to: {price: fix.price, pay: fix.pay, note: 'помилилась у сумі'}}); fix.note = 'помилилась у сумі'; }
+  // залишки на складі
+  const W = {};
+  Object.keys(SALONS).forEach((sal, si) => {
+    const use = {}, since = Date.now() - 30 * 864e5;
+    visits.filter(v => v.salon === sal && new Date(v.ts) >= since).forEach(v => v.lines.forEach(l => { use[l.item] = (use[l.item] || 0) + l.q / 30; }));
+    W[sal] = {stock: {}, min: {}};
+    items.forEach((it, i) => {
+      const u = use[it.id] || 0.05, days = [16, 4, 21, 28, 9, 35, 45, 60, 75, 90, 120, 24, 30, 50, 18][(i * 7 + si * 4) % 15];
+      W[sal].min[it.id] = Math.max(roundTo(u * 10, it), it.unit === 'мл' || it.unit === 'г' ? 5 : 1);
+      W[sal].stock[it.id] = roundTo(u * days, it);
+    });
+  });
+  const ops = [];
+  let oid = 1;
+  [[24, 'sw', 'Kodi Professional', [['base', 6], ['top', 6], ['color', 20]]], [19, 'wb', 'Hurtownia Fryzjerska Kaleta', [['shamp', 4], ['dye', 25], ['oxi', 3]]],
+   [12, 'sw', 'Lash Store PL', [['lashes', 12], ['lglue', 4]]], [8, 'wb', 'Kodi Professional', [['base', 4], ['color', 15]]], [3, 'sw', 'Medi-Hurt', [['gloves', 6], ['wipes', 2]]]]
+    .forEach(([ago, salon, sup, ls]) => ops.push({id: 'o' + oid++, type: 'receipt', salon, sup, ts: dayAt(ago, 11, 20).toISOString(), by: 'anastasia', lines: ls.map(([item, packs]) => {
+      const it = items.find(x => x.id === item); return {item, q: packs * it.pack.size, packs, cost: packs * it.pack.price};
+    })}));
+  // каса: перерахунок 1-го числа, власниця забирає готівку щосуботи ввечері, аванси дівчат
+  const kassa = [], md = now.getDate();
+  Object.keys(SALONS).forEach(sal => {
+    kassa.push({id: 'k' + oid++, salon: sal, type: 'count', amount: 400, expected: 400, ts: dayAt(md - 1, 8, 50).toISOString(), by: 'anastasia', note: 'Початок місяця'});
+    let last = dayAt(md - 1, 8, 50);
+    for (let ago = md - 1; ago >= 1; ago--) {
+      const d = dayAt(ago, 19, 30);
+      if (d.getDay() !== 6) continue;
+      const cash = visits.filter(v => v.salon === sal && v.pay === 'cash' && new Date(v.ts) > last && new Date(v.ts) <= d).reduce((a, v) => a + v.price, 0);
+      const take = Math.max(0, Math.floor((cash - 100) / 50) * 50);
+      if (take) kassa.push({id: 'k' + oid++, salon: sal, type: 'take', amount: take, ts: d.toISOString(), by: 'anastasia', note: 'Забрала виручку'});
+      last = d;
+    }
+  });
+  [['m2', 200, Math.min(md - 1, 15), true], ['m3', 300, Math.min(md - 1, 10), true], ['m8', 250, Math.min(md - 1, 6), true], ['m1', 150, 0, false]]
+    .forEach(([mid, amount, ago, ok]) => {
+      const m = masters.find(x => x.id === mid);
+      kassa.push({id: 'k' + oid++, salon: m.salon, type: 'advance', master: mid, amount, ts: dayAt(ago, ago ? 13 : 10, 5).toISOString(), by: m.login, ok, note: ok ? 'Погоджено телефоном' : ''});
+    });
+  // виплати: минулий місяць виплачено всім готівкою
+  const payouts = [], prevM = monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+  const pa = new Date(now.getFullYear(), now.getMonth() - 1, 1), pb = new Date(now.getFullYear(), now.getMonth(), 1);
+  masters.filter(m => !m.owner).forEach(m => {
+    const sum = visits.filter(v => v.master === m.id && new Date(v.ts) >= pa && new Date(v.ts) < pb).reduce((a, v) => a + v.price, 0) * m.pct / 100;
+    payouts.push({master: m.id, month: prevM, amount: Math.round(sum), ts: dayAt(md - 1, 18).toISOString(), by: 'anastasia'});
+  });
+  const reqs = [
+    {id: 'r1', salon: 'wb', item: 'top', text: '', qty: '2 шт', urgent: true, by: 'viktoria', ts: dayAt(0, 9, 40).toISOString(), done: null},
+    {id: 'r2', salon: 'sw', item: 'foil', text: '', qty: '1 уп.', urgent: false, by: 'sofia', ts: dayAt(1, 17, 10).toISOString(), done: null},
+    {id: 'r3', salon: 'wb', item: '', text: 'Пінцет для вій (зламався)', qty: '1 шт', urgent: false, by: 'valya', ts: dayAt(2, 12, 0).toISOString(), done: null},
+    {id: 'r4', salon: 'wb', item: 'gloves', text: '', qty: '6 уп.', urgent: true, by: 'karyna', ts: dayAt(4, 10, 0).toISOString(), done: {ts: dayAt(3, 16).toISOString(), by: 'anastasia'}},
+    {id: 'r5', salon: 'sw', item: 'lglue', text: '', qty: '2 шт', urgent: false, by: 'daryna', ts: dayAt(9, 11, 0).toISOString(), done: {ts: dayAt(8, 15).toISOString(), by: 'admin'}}
+  ];
+  return {wh: 'wb', me: '', items, services, masters, users, clients, visits, ops, W, kassa, payouts, reqs, calls: [], seq: {v: vid, o: oid, c: cid.n}};
+}
+function roundTo(v, it) {
+  const step = it.unit === 'мл' || it.unit === 'г' ? (it.pack.size >= 100 ? 10 : 1) : 1;
+  return Math.max(0, Math.round(v / step) * step);
+}
+function monthKey(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+
+let S;
+function load() {
+  try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { S = null; }
+  if (!S || !S.visits || !S.users) S = freshState();
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+/* ---------- хто увійшов ---------- */
+const ME = () => S.users.find(u => u.login === S.me) || {role: 'owner', name: '', login: ''};
+const isOwner = () => ME().role === 'owner', isAdmin = () => ME().role === 'admin', isMaster = () => ME().role === 'master';
+const myMaster = () => isMaster() ? master(ME().master) : null;
+const ownerMaster = () => S.masters.find(m => m.owner);
+const pctTxt = m => m.owner ? 'власниця' : m.pct + '%';
+const mTitle = m => m.title || CATS[m.cat].name;
+const userName = login => (S.users.find(u => u.login === login) || {name: login}).name;
+
+/* ---------- довідники та розрахунки ---------- */
+const item = id => S.items.find(i => i.id === id) || {id, name: '(видалено)', unit: 'шт', pack: {size: 1, price: 0}, cat: 'common'};
+const svc = id => S.services.find(s => s.id === id) || {id, name: '(видалено)', price: 0, mats: [], cat: 'common', remind: 0};
+const master = id => S.masters.find(m => m.id === id) || {id, name: '(видалено)', pct: 0, salon: 'sw', svcs: [], cat: 'nails'};
+const client = id => S.clients.find(c => c.id === id) || {id, name: 'Клієнт', phone: ''};
+const unitPrice = it => it.pack.price / it.pack.size;
+const linesCost = lines => lines.reduce((a, l) => a + l.q * unitPrice(item(l.item)), 0);
+const sameDay = (a, b = new Date()) => new Date(a).toDateString() === new Date(b).toDateString();
+function salonVisits() {
+  if (isMaster()) return S.visits.filter(v => v.master === myMaster().id);
+  return S.visits.filter(v => S.wh === 'all' || v.salon === S.wh);
+}
+function stockOf(id, sal = S.wh) { return S.W[sal].stock[id] || 0; }
+function minOf(id, sal = S.wh) { return S.W[sal].min[id] || 0; }
+function usagePerDay(id, sal = S.wh) {
+  const since = Date.now() - 30 * 864e5;
+  let s = 0;
+  S.visits.forEach(v => { if (v.salon === sal && new Date(v.ts) >= since) v.lines.forEach(l => { if (l.item === id) s += l.q; }); });
+  return s / 30;
+}
+function daysLeft(id, sal = S.wh) { const u = usagePerDay(id, sal); return u > 0 ? stockOf(id, sal) / u : Infinity; }
+function status(id, sal = S.wh) {
+  const st = stockOf(id, sal), mn = minOf(id, sal), d = daysLeft(id, sal);
+  if (st <= mn * 0.5 || d < 5) return 'crit';
+  if (st <= mn || d < 12) return 'low';
+  return 'ok';
+}
+function periodRange(p) {
+  const n = new Date(), d0 = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  if (p === 'month') return [new Date(n.getFullYear(), n.getMonth(), 1), new Date(n.getFullYear(), n.getMonth() + 1, 1), 'цей місяць'];
+  if (p === 'prev') return [new Date(n.getFullYear(), n.getMonth() - 1, 1), new Date(n.getFullYear(), n.getMonth(), 1), 'минулий місяць'];
+  if (p === 'week') return [new Date(d0.getTime() - 6 * 864e5), new Date(d0.getTime() + 864e5), 'останні 7 днів'];
+  return [d0, new Date(d0.getTime() + 864e5), 'сьогодні'];
+}
+function inPeriod(ts, p) { const [a, b] = periodRange(p), t = new Date(ts); return t >= a && t < b; }
+function advancesOf(mid, p) { return S.kassa.filter(k => k.type === 'advance' && k.master === mid && inPeriod(k.ts, p)).reduce((a, k) => a + k.amount, 0); }
+function paidOf(mid, mk) { return S.payouts.filter(x => x.master === mid && x.month === mk).reduce((a, x) => a + x.amount, 0); }
+function masterStats(m, p) {
+  const vs = S.visits.filter(v => v.master === m.id && inPeriod(v.ts, p));
+  const rev = vs.reduce((a, v) => a + v.price, 0), mat = vs.reduce((a, v) => a + linesCost(v.lines), 0);
+  const sal = m.owner ? 0 : rev * m.pct / 100, adv = advancesOf(m.id, p);
+  const mk = monthKey(periodRange(p)[0]), paid = (p === 'month' || p === 'prev') ? paidOf(m.id, mk) : 0;
+  return {vs, n: vs.length, clients: new Set(vs.map(v => v.client)).size, rev, mat, sal, adv, paid, left: rev - sal - mat,
+    due: Math.max(0, Math.round(sal - adv - paid)), avg: vs.length ? rev / vs.length : 0};
+}
+// Каса: останній перерахунок + готівка від клієнтів − аванси − забрала власниця
+function kassaState(sal) {
+  const ks = S.kassa.filter(k => k.salon === sal).sort((a, b) => a.ts.localeCompare(b.ts));
+  const last = ks.filter(k => k.type === 'count').pop();
+  const from = last ? new Date(last.ts) : new Date(0);
+  const cashIn = S.visits.filter(v => v.salon === sal && v.pay === 'cash' && new Date(v.ts) > from).reduce((a, v) => a + v.price, 0);
+  const after = ks.filter(k => new Date(k.ts) > from);
+  const adv = after.filter(k => k.type === 'advance').reduce((a, k) => a + k.amount, 0);
+  const take = after.filter(k => k.type === 'take').reduce((a, k) => a + k.amount, 0);
+  return {start: last ? last.amount : 0, last, cashIn, adv, take, expected: (last ? last.amount : 0) + cashIn - adv - take};
+}
+// База клієнтів: візити кожного клієнта, хто з ним працював останнім, коли нагадати
+function clientIndex() {
+  const by = {};
+  S.visits.forEach(v => { (by[v.client] = by[v.client] || []).push(v); });
+  Object.values(by).forEach(a => a.sort((x, y) => x.ts.localeCompare(y.ts)));
+  return by;
+}
+function clientInfo(c, idx) {
+  const vs = idx[c.id] || [], last = vs[vs.length - 1];
+  const remind = last ? Math.max(0, ...last.svcs.map(s => svc(s).remind)) : 0;
+  const days = last ? Math.floor((Date.now() - new Date(last.ts)) / 864e5) : 0;
+  const calls = S.calls.filter(x => x.client === c.id).sort((a, b) => b.ts.localeCompare(a.ts));
+  const lastCall = calls[0];
+  const snoozed = lastCall && last && new Date(lastCall.ts) > new Date(last.ts) &&
+    (lastCall.res === 'booked' || lastCall.res === 'no' || Date.now() - new Date(lastCall.ts) < 7 * 864e5);
+  return {vs, last, n: vs.length, sum: vs.reduce((a, v) => a + v.price, 0), remind, days, calls, lastCall,
+    overdue: !!(last && remind && days > remind && !snoozed), lastMaster: last ? last.master : null};
+}
+function visibleClients() {
+  return S.clients.filter(c => isMaster() ? c.salon === myMaster().salon : S.wh === 'all' || c.salon === S.wh);
+}
+function findClientByPhone(sal, digits) { return digits.length >= 9 ? S.clients.find(c => c.salon === sal && c.phone.slice(-9) === digits.slice(-9)) : null; }
+function canEditVisit(v) {
+  if (isOwner()) return true;
+  if (!sameDay(v.ts)) return false;
+  if (isAdmin()) return true;
+  return isMaster() && v.master === myMaster().id;
+}
+
+/* ---------- формат ---------- */
+const nf0 = new Intl.NumberFormat('uk-UA', {maximumFractionDigits: 0});
+const nf1 = new Intl.NumberFormat('uk-UA', {maximumFractionDigits: 1});
+const nf2 = new Intl.NumberFormat('uk-UA', {maximumFractionDigits: 2});
+function money(v) { return (Math.abs(v) < 100 && v % 1 ? nf2.format(v) : nf0.format(Math.round(v))) + ' ' + CUR; }
+function qtyFmt(it, v) { return (it.unit === 'лоток' || it.unit === 'саше' ? nf2.format(v) : nf1.format(v)) + ' ' + it.unit; }
+function packsFmt(it, v) { return it.pack.size > 1 ? '≈ ' + nf1.format(v / it.pack.size) + ' уп.' : ''; }
+function dateFmt(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('uk-UA', {day: '2-digit', month: '2-digit'}) + ' ' + d.toLocaleTimeString('uk-UA', {hour: '2-digit', minute: '2-digit'});
+}
+function dayFmt(ts) { return new Date(ts).toLocaleDateString('uk-UA', {day: 'numeric', month: 'short'}); }
+function phoneFmt(p) { const d = String(p || '').replace(/\D/g, '').slice(-9); return d.length === 9 ? `+48 ${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}` : p; }
+function chip(st) { return {ok: '<span class="chip ok">в нормі</span>', low: '<span class="chip low">мало</span>', crit: '<span class="chip crit">терміново замовити</span>'}[st]; }
+function daysTxt(d) { return d === Infinity ? '—' : d > 99 ? '99+ дн.' : nf0.format(Math.floor(d)) + ' дн.'; }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c])); }
+function initials(n) { return n.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(); }
+function ava(m) { return `<span class="ava c-${m.cat}">${esc(initials(m.name))}</span>`; }
+function salonTag(sal) { return `<span class="chip mute">${SALONS[sal].name}</span>`; }
+
+/* ---------- іконки ---------- */
+const P = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const I = {
+  home: P('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>'),
+  plus: P('<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'),
+  users: P('<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.8-3.2 3-5 5.5-5s4.7 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.2.2 3.9 1.8 4.5 4.8"/>'),
+  phone: P('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>'),
+  cash: P('<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 9v.01M18 15v.01"/>'),
+  bag: P('<path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'),
+  box: P('<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>'),
+  in: P('<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/>'),
+  cart: P('<path d="M3 4h2l2.4 11h11L21 7H6.2"/><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/>'),
+  list: P('<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>'),
+  clock: P('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+  out: P('<path d="M14 4h5v16h-5"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h10"/>'),
+  pen: P('<path d="M4 20h4L19 9l-4-4L4 16v4z"/>')
+};
+
+const VIEWS = [
+  {id: 'dash', title: 'Головна', icon: 'home', roles: ['owner']},
+  {id: 'me', title: 'Мій місяць', icon: 'home', roles: ['master']},
+  {id: 'visit', title: 'Новий візит', icon: 'plus', roles: ['owner', 'admin', 'master'], salon: true},
+  {id: 'masters', title: 'Майстри і зарплати', icon: 'users', roles: ['owner']},
+  {id: 'clients', title: 'Клієнти', icon: 'phone', roles: ['owner', 'admin', 'master']},
+  {id: 'kassa', title: 'Каса', icon: 'cash', roles: ['owner', 'admin'], salon: true},
+  {id: 'reqs', title: 'Треба купити', icon: 'bag', roles: ['owner', 'admin', 'master']},
+  {id: 'stock', title: 'Склад', icon: 'box', roles: ['owner', 'admin'], salon: true},
+  {id: 'receipt', title: 'Прихід', icon: 'in', roles: ['owner', 'admin'], salon: true},
+  {id: 'buy', title: 'Закупівля', icon: 'cart', roles: ['owner', 'admin'], salon: true},
+  {id: 'services', title: 'Послуги та норми', icon: 'list', roles: ['owner']},
+  {id: 'log', title: 'Історія', icon: 'clock', roles: ['owner', 'admin', 'master']}
+];
+const myViews = () => VIEWS.filter(v => v.roles.includes(ME().role));
+let current = 'dash';
+let ui = {period: 'month', stockTab: 'nails', search: '', v: null, rec: {item: 'base', packs: 2, sup: '', price: ''}, logFilter: 'all', logMaster: '',
+  lastSalon: 'wb', sort: {key: '', dir: 1}, clTab: 'due', clQ: '', req: {item: '', text: '', qty: '', urgent: false}};
+
+function openReqs() { return S.reqs.filter(r => !r.done && (isMaster() ? r.salon === myMaster().salon : S.wh === 'all' || r.salon === S.wh)); }
+function overdueCount() {
+  const idx = clientIndex(), me = myMaster();
+  return visibleClients().filter(c => { const i = clientInfo(c, idx); return i.overdue && (!me || i.lastMaster === me.id); }).length;
+}
+function renderNav() {
+  renderBnav();
+  const rq = openReqs().length, od = overdueCount();
+  const badge = id => id === 'reqs' && rq ? `<span class="badge">${rq}</span>` : id === 'clients' && od ? `<span class="badge soft">${od}</span>` : '';
+  document.getElementById('nav').innerHTML = myViews().map(v =>
+    `<a data-go="${v.id}" class="${v.id === current ? 'active' : ''}">${I[v.icon]}<span class="lbl">${v.title}</span>${badge(v.id)}</a>`).join('');
+  const u = ME();
+  document.getElementById('who').textContent = u.name;
+  document.getElementById('whoSub').textContent = ROLES[u.role] + (isMaster() ? ' · ' + SALONS[myMaster().salon].name : '');
+}
+function go(id) {
+  closeSheet();
+  const v = myViews().find(x => x.id === id);
+  if (!v) return;
+  if (v.salon && S.wh === 'all') S.wh = ui.lastSalon || 'sw';
+  current = id; renderNav(); render(true); window.scrollTo({top: 0});
+}
+const MAIN_TABS = {owner: ['dash', 'visit', 'masters', 'clients'], admin: ['visit', 'clients', 'kassa', 'reqs'], master: ['me', 'visit', 'clients', 'reqs']};
+function renderBnav() {
+  const tabs = MAIN_TABS[ME().role], more = !tabs.includes(current);
+  document.getElementById('bnav').innerHTML = myViews().filter(v => tabs.includes(v.id)).map(v =>
+    `<a data-go="${v.id}" class="${v.id === current ? 'active' : ''}">${I[v.icon]}<span>${v.title.split(' ')[0]}</span></a>`).join('') +
+    `<a data-more="1" class="${more ? 'active' : ''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg><span>Ще</span></a>`;
+}
+function openSheet() {
+  const tabs = MAIN_TABS[ME().role];
+  document.getElementById('sheet').innerHTML = `<div class="sheet-h"></div>` + myViews().filter(v => !tabs.includes(v.id)).map(v =>
+    `<a data-go="${v.id}" class="${v.id === current ? 'active' : ''}">${I[v.icon]}<span>${v.title}</span></a>`).join('') +
+    `<div class="sheet-sep"></div><a data-reset="1">${I.list}<span>Скинути демо</span></a><a data-logout="1">${I.out}<span>Вийти</span></a>`;
+  document.getElementById('sheet').classList.remove('hidden');
+  document.getElementById('sheetBg').classList.remove('hidden');
+}
+function closeSheet() {
+  document.getElementById('sheet').classList.add('hidden');
+  document.getElementById('sheetBg').classList.add('hidden');
+}
+function header(title, sub, right = '') {
+  let sw = '';
+  if (isMaster()) sw = `<span class="chip mute" style="font-size:13px;padding:6px 12px">${SALONS[myMaster().salon].name}</span>`;
+  else {
+    const v = VIEWS.find(x => x.id === current), opts = Object.entries(SALONS).map(([k, s]) => [k, s.name]);
+    if (!v.salon && isOwner()) opts.push(['all', 'Обидва салони']);
+    sw = `<div class="tabs wh" data-seg="wh"><span class="seg-ind"></span>${opts.map(([k, n]) => `<button data-wh="${k}" class="${S.wh === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+  }
+  return `<div class="top"><div><h1>${title}</h1><div class="sub">${sub}</div></div><div class="top-r">${right}${sw}<span class="demo-chip">ДЕМО</span></div></div>`;
+}
+function salonTitle() { return S.wh === 'all' ? 'обидва салони' : SALONS[S.wh].name; }
+function periodTabs() {
+  return `<div class="tabs" data-seg="per"><span class="seg-ind"></span>${[['today', 'Сьогодні'], ['week', '7 днів'], ['month', 'Цей місяць'], ['prev', 'Минулий місяць']].map(([k, n]) =>
+    `<button data-per="${k}" class="${ui.period === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+}
+
+/* ---------- ГОЛОВНА (власниця) ---------- */
+function viewDash() {
+  const n = new Date();
+  const vsM = salonVisits().filter(v => inPeriod(v.ts, 'month'));
+  const pa = new Date(n.getFullYear(), n.getMonth() - 1, 1), pb = new Date(n.getFullYear(), n.getMonth() - 1, n.getDate(), n.getHours(), n.getMinutes());
+  const vsP = salonVisits().filter(v => { const t = new Date(v.ts); return t >= pa && t <= pb; });
+  const rev = vsM.reduce((a, v) => a + v.price, 0), revP = vsP.reduce((a, v) => a + v.price, 0);
+  const trend = revP ? Math.round((rev - revP) / revP * 100) : 0;
+  const clients = new Set(vsM.map(v => v.client)).size;
+  const ms = S.masters.filter(m => S.wh === 'all' || m.salon === S.wh).map(m => ({m, ...masterStats(m, 'month')})).sort((a, b) => b.rev - a.rev);
+  const toPay = ms.reduce((a, x) => a + x.due, 0), adv = ms.reduce((a, x) => a + x.adv, 0);
+  const daily = dailyRevenue(14), maxRev = Math.max(1, ...ms.map(x => x.rev));
+  const src = {}; vsM.forEach(v => { src[v.src] = src[v.src] || {n: 0, rev: 0}; src[v.src].n++; src[v.src].rev += v.price; });
+  const maxSrc = Math.max(1, ...Object.values(src).map(x => x.n));
+  const newCl = vsM.filter(v => v.src !== 'regular').length;
+  const reqs = openReqs(), od = overdueCount();
+  const pend = S.kassa.filter(k => k.type === 'advance' && !k.ok && (S.wh === 'all' || k.salon === S.wh));
+  const hello = n.getHours() < 12 ? 'Доброго ранку' : n.getHours() < 18 ? 'Добрий день' : 'Добрий вечір';
+  const kas = (S.wh === 'all' ? Object.keys(SALONS) : [S.wh]).map(s => ({s, ...kassaState(s)}));
+  const todayV = salonVisits().filter(v => sameDay(v.ts));
+  return header(`${hello}, Анастасіє`, `WEISS · ${salonTitle()} · ${n.toLocaleDateString('uk-UA', {day: 'numeric', month: 'long'})}`) + `
+  ${pend.length || reqs.length || od ? `<div class="alerts">
+    ${pend.map(k => `<div class="alert-li">${I.cash}<span><b>${esc(master(k.master).name)}</b> взяла аванс ${money(k.amount)} з каси (${SALONS[k.salon].name}, ${dateFmt(k.ts)})</span><button class="btn btn-sm" data-kok="${k.id}">Погоджено</button></div>`).join('')}
+    ${reqs.length ? `<div class="alert-li">${I.bag}<span>Дівчата просять купити: <b>${reqs.slice(0, 3).map(r => esc(r.item ? item(r.item).name : r.text)).join(', ')}</b>${reqs.length > 3 ? ' та ще ' + (reqs.length - 3) : ''}</span><button class="btn btn-sm" data-go="reqs">Відкрити</button></div>` : ''}
+    ${od ? `<div class="alert-li">${I.phone}<span><b>${od} клієнтів</b> давно не були — варто подзвонити й запросити</span><button class="btn btn-sm" data-go="clients">Список</button></div>` : ''}
+  </div>` : ''}
+  <div class="grid g4">
+    <div class="card kpi"><div class="label">Виручка за місяць</div><div class="val"><span data-count="${Math.round(rev)}">${nf0.format(Math.round(rev))}</span> <span style="font-size:18px;font-weight:500">${CUR}</span></div>
+      <div class="note"><span class="delta ${trend < 0 ? 'down' : ''}">${trend < 0 ? '↓' : '↑'} ${nf0.format(Math.abs(trend))}%</span> до тих самих днів минулого місяця</div>${spark(daily.map(d => d.rev))}</div>
+    <div class="card kpi"><div class="label">Сьогодні</div><div class="val">${money(todayV.reduce((a, v) => a + v.price, 0))}</div><div class="note">${todayV.length} візитів · за місяць ${vsM.length} візитів, ${clients} клієнтів</div></div>
+    <div class="card kpi"><div class="label">До виплати майстрам</div><div class="val"><span data-count="${Math.round(toPay)}">${nf0.format(Math.round(toPay))}</span> <span style="font-size:18px;font-weight:500">${CUR}</span></div><div class="note">за місяць, уже взяли авансів ${money(adv)}</div></div>
+    <div class="card kpi"><div class="label">Має бути в касі</div><div class="val">${money(kas.reduce((a, k) => a + k.expected, 0))}</div><div class="note">${kas.map(k => `${SALONS[k.s].name}: ${money(k.expected)}`).join(' · ')}</div></div>
+  </div>
+  <div class="grid g32" style="margin-top:16px">
+    <div class="card"><div class="card-h"><h2>Виручка по днях, ${CUR}</h2><span class="muted" style="font-size:13px">останні 14 днів</span></div>${revChart(daily)}</div>
+    <div class="card"><div class="card-h"><h2>Майстри цього місяця</h2><button class="btn btn-sm" data-go="masters">Зарплати</button></div>
+      <div class="list">${ms.slice(0, 6).map(x => `<div class="li">${ava(x.m)}<div class="grow"><div class="t">${esc(x.m.name)}${S.wh === 'all' ? ' ' + salonTag(x.m.salon) : ''}</div>
+        <div class="bar" style="margin-top:6px"><i style="width:${x.rev / maxRev * 100}%;background:var(--accent)"></i></div></div>
+        <div style="text-align:right"><b>${money(x.rev)}</b><div class="s muted" style="font-size:12px">${x.n} візитів</div></div></div>`).join('')}</div></div>
+  </div>
+  <div class="grid g32" style="margin-top:16px">
+    <div class="card"><div class="card-h"><h2>Звідки клієнти цього місяця</h2><span class="muted" style="font-size:13px">візитів нових клієнтів: ${newCl}</span></div>
+      <div class="list">${Object.keys(SOURCES).filter(k => src[k]).sort((a, b) => src[b].n - src[a].n).map(k => `<div class="li"><div class="grow"><div class="t">${SOURCES[k]}</div>
+        <div class="bar" style="margin-top:6px"><i style="width:${src[k].n / maxSrc * 100}%;background:var(--accent)"></i></div></div>
+        <div style="text-align:right"><b>${src[k].n} візитів</b><div class="s muted" style="font-size:12px">${money(src[k].rev)}</div></div></div>`).join('')}</div></div>
+    <div class="card"><div class="card-h"><h2>Останні візити</h2><button class="btn btn-sm" data-go="log">Історія</button></div>
+      <div class="list">${salonVisits().slice().sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 6).map(v => visitRow(v)).join('')}</div></div>
+  </div>`;
+}
+function dailyRevenue(n) {
+  const out = [];
+  for (let d = n - 1; d >= 0; d--) out.push({day: dayAt(d, 0), rev: 0});
+  salonVisits().forEach(v => { const t = new Date(v.ts).toDateString(), k = out.find(x => x.day.toDateString() === t); if (k) k.rev += v.price; });
+  return out;
+}
+function spark(vals) {
+  const W = 200, H = 34, max = Math.max(1, ...vals), step = W / (vals.length - 1);
+  const d = vals.map((v, i) => (i ? 'L' : 'M') + (i * step).toFixed(1) + ' ' + (H - 3 - v / max * (H - 6)).toFixed(1)).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path d="${d} L${W} ${H} L0 ${H}Z" fill="var(--accent-soft)"/><path class="l" d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
+}
+function revChart(days) {
+  const W = 640, H = 200, pad = 6, max = Math.max(1, ...days.map(d => d.rev)), bw = (W - pad) / days.length;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="0" x2="${W}" y1="${H - 22}" y2="${H - 22}" stroke="var(--line)"/>${days.map((d, i) => {
+    const h = d.rev / max * (H - 48), x = pad + i * bw + bw * .16, y = H - 22 - h, sun = d.day.getDay() === 0;
+    return `<rect class="b" style="animation-delay:${i * 35}ms" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(bw * .68).toFixed(1)}" height="${Math.max(h, 1).toFixed(1)}" rx="5" fill="var(--accent)" opacity="${d.rev ? .85 : .2}"><title>${d.day.toLocaleDateString('uk-UA')}: ${money(d.rev)}</title></rect>
+      <text x="${(x + bw * .34).toFixed(1)}" y="${H - 6}" text-anchor="middle" font-size="11" fill="var(--muted)">${sun ? 'нд' : d.day.getDate()}</text>
+      ${d.rev ? `<text x="${(x + bw * .34).toFixed(1)}" y="${(y - 6).toFixed(1)}" text-anchor="middle" font-size="10" fill="var(--muted)">${d.rev >= 1000 ? nf1.format(d.rev / 1000) + 'к' : nf0.format(d.rev)}</text>` : ''}`;
+  }).join('')}</svg>`;
+}
+function visitRow(v, opts = {}) {
+  const m = master(v.master), c = client(v.client);
+  const edited = v.hist && v.hist.length ? ' <span class="chip low">виправлено</span>' : '';
+  return `<div class="li">${ava(m)}<div class="grow"><div class="t">${v.svcs.map(s => esc(svc(s).name)).join(' + ')} — ${money(v.price)}${edited}</div>
+    <div class="s">${dateFmt(v.ts)} · ${esc(m.name)} · ${esc(c.name)} · ${PAYS[v.pay]} · ${SOURCES[v.src] || ''}${S.wh === 'all' && !isMaster() ? ' · ' + SALONS[v.salon].name : ''}${v.note ? ' · <i>' + esc(v.note) + '</i>' : ''}</div></div>
+    ${opts.edit && canEditVisit(v) ? `<button class="btn btn-sm btn-ghost" data-vedit="${v.id}">✎</button>` : ''}</div>`;
+}
+
+/* ---------- МІЙ МІСЯЦЬ (майстриня) ---------- */
+function viewMe() {
+  const m = myMaster(), x = masterStats(m, 'month'), t = masterStats(m, 'today');
+  const idx = clientIndex();
+  const due = visibleClients().map(c => ({c, ...clientInfo(c, idx)})).filter(i => i.overdue && i.lastMaster === m.id).sort((a, b) => (b.days - b.remind) - (a.days - a.remind));
+  const advs = S.kassa.filter(k => k.type === 'advance' && k.master === m.id && inPeriod(k.ts, 'month'));
+  return header(`Привіт, ${esc(m.name.split(' ')[0])}`, `Твої візити й зарплата за ${new Date().toLocaleDateString('uk-UA', {month: 'long'})} — бачиш тільки ти й Анастасія`,
+    `<button class="btn" data-adv="1">Взяла аванс з каси</button><button class="btn btn-primary" data-go="visit">+ Новий візит</button>`) + `
+  <div class="grid g4">
+    <div class="card kpi"><div class="label">Сьогодні</div><div class="val">${money(t.rev)}</div><div class="note">${t.n} візитів · тобі ${money(t.sal)}</div></div>
+    <div class="card kpi"><div class="label">За місяць зробила</div><div class="val">${money(x.rev)}</div><div class="note">${x.n} візитів, ${x.clients} клієнтів</div></div>
+    <div class="card kpi"><div class="label">Моя зарплата (${m.pct}%)</div><div class="val">${money(x.sal)}</div><div class="note">рахується сама з кожного візиту</div></div>
+    <div class="card kpi"><div class="label">До виплати</div><div class="val">${money(x.due)}</div><div class="note">мінус аванси ${money(x.adv)}${x.paid ? ', виплачено ' + money(x.paid) : ''}</div></div>
+  </div>
+  <div class="grid g32" style="margin-top:16px">
+    <div class="card"><div class="card-h"><h2>Мої візити цього місяця</h2><span class="muted" style="font-size:13px">помилилась у сумі — ✎ можна виправити в той самий день</span></div>
+      <div class="list">${x.vs.slice().sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 12).map(v => visitRow(v, {edit: true})).join('') || '<div class="empty">Ще немає візитів</div>'}</div></div>
+    <div>
+      <div class="card"><div class="card-h"><h2>Давно не були — подзвони</h2><button class="btn btn-sm" data-go="clients">Усі</button></div>
+        <div class="list">${due.slice(0, 5).map(i => `<div class="li"><div class="grow"><div class="t">${esc(i.c.name)}</div><div class="s">${phoneFmt(i.c.phone)} · ${esc(svc(i.last.svcs[0]).name)} ${i.days} дн. тому</div></div><button class="btn btn-sm" data-call="${i.c.id}">Подзвонила</button></div>`).join('') || '<div class="empty">Усі твої клієнти приходять вчасно</div>'}</div></div>
+      <div class="card" style="margin-top:16px"><div class="card-h"><h2>Аванси цього місяця</h2></div>
+        <div class="list">${advs.map(k => `<div class="li"><span class="ico" style="background:var(--low-soft);color:var(--low)">${I.cash}</span><div class="grow"><div class="t">${money(k.amount)}</div><div class="s">${dateFmt(k.ts)}${k.note ? ' · ' + esc(k.note) : ''}</div></div>${k.ok ? '<span class="chip ok">погоджено</span>' : '<span class="chip mute">чекає</span>'}</div>`).join('') || '<div class="empty">Авансів не було</div>'}</div></div>
+    </div>
+  </div>`;
+}
+function openAdvance() {
+  const ms = isMaster() ? [myMaster()] : S.masters.filter(m => m.salon === S.wh && !m.owner);
+  openModal(`<h2>Аванс з каси</h2>
+    <div class="muted" style="font-size:13px">Записуємо, щоб Анастасія бачила, і щоб аванс сам відняли від зарплати</div>
+    ${isMaster() ? '' : `<div class="field"><label>Хто взяв</label><select class="select" id="aMaster">${ms.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select></div>`}
+    <div class="field"><label>Сума, ${CUR}</label><input class="input" id="aSum" inputmode="decimal" placeholder="наприклад, 200" autofocus></div>
+    <div class="field"><label>Примітка</label><input class="input" id="aNote" placeholder="наприклад, погоджено з Анастасією по телефону"></div>
+    <div class="err" id="aErr"></div>
+    <div class="m-act"><button class="btn" data-close="1">Скасувати</button><button class="btn btn-primary" data-asave="1">Записати</button></div>`);
+}
+
+/* ---------- НОВИЙ ВІЗИТ ---------- */
+function visitDraft() {
+  const sal = isMaster() ? myMaster().salon : S.wh;
+  const own = isOwner() && ownerMaster() && ownerMaster().salon === sal ? ownerMaster().id : '';
+  if (!ui.v || ui.v.salon !== sal) ui.v = {salon: sal, master: isMaster() ? myMaster().id : own, svcs: [], phone: '', name: '', src: '', price: '', pay: 'card', note: ''};
+  if (isMaster()) ui.v.master = myMaster().id;
+  return ui.v;
+}
+function draftLines(v) {
+  const out = {};
+  v.svcs.forEach(s => svc(s).mats.forEach(l => { out[l.item] = (out[l.item] || 0) + l.q; }));
+  return Object.entries(out).map(([item, q]) => ({item, q}));
+}
+function viewVisit() {
+  const v = visitDraft(), ms = S.masters.filter(m => m.salon === v.salon), m = v.master ? master(v.master) : null;
+  const base = v.svcs.reduce((a, s) => a + svc(s).price, 0), price = v.price === '' ? base : parseFloat(String(v.price).replace(',', '.')) || 0;
+  const lines = draftLines(v), cost = linesCost(lines), sal = m && !m.owner ? price * m.pct / 100 : 0;
+  const digits = v.phone.replace(/\D/g, ''), known = findClientByPhone(v.salon, digits);
+  const info = known ? clientInfo(known, clientIndex()) : null;
+  if (known && !v.src) v.src = 'regular';
+  const ready = m && v.svcs.length && digits.length >= 9 && (known || v.name.trim()) && v.src;
+  return header('Новий візит', 'Після клієнта — запиши тут замість зошита. Зарплата й матеріали порахуються самі') + `
+  <div class="grid g32">
+    <div class="card">
+      ${isMaster() ? `<div class="name" style="gap:10px">${ava(m)}<b>${esc(m.name)}</b></div>` : `<div class="field" style="margin-top:0"><label>1. Майстер</label><div class="reasons">${ms.map(x =>
+        `<button class="btn ${v.master === x.id ? 'on' : ''}" data-vm="${x.id}">${ava(x)} ${esc(x.name)}${x.owner && isOwner() ? ' (я)' : ''}</button>`).join('')}</div></div>`}
+      <div class="field"><label>${isMaster() ? '1' : '2'}. Послуги <span class="muted">(можна кілька)</span></label>${m ? `<div class="reasons">${m.svcs.map(id => { const s = svc(id);
+        return `<button class="btn ${v.svcs.includes(id) ? 'on' : ''}" data-vs="${id}">${esc(s.name)} · ${money(s.price)}</button>`; }).join('')}</div>` : '<div class="muted" style="font-size:14px">Спершу оберіть майстра</div>'}</div>
+      <div class="m-grid">
+        <div class="field"><label>Телефон клієнта *</label><input class="input" id="vPhone" inputmode="tel" value="${esc(v.phone)}" placeholder="+48 ___ ___ ___"></div>
+        <div class="field"><label>Ім'я клієнта *</label><input class="input" id="vName" value="${esc(known ? known.name : v.name)}" ${known ? 'disabled' : ''} placeholder="Ім'я та перша літера прізвища"></div>
+      </div>
+      ${known ? `<div class="hint" style="margin-top:10px">Постійна клієнтка: ${info.n} візитів на ${money(info.sum)}, остання — ${info.last ? dayFmt(info.last.ts) + ', ' + esc(svc(info.last.svcs[0]).name) : '—'}</div>` : digits.length >= 9 ? '<div class="hint" style="margin-top:10px">Нова клієнтка — з’явиться в базі</div>' : ''}
+      <div class="field"><label>Звідки клієнт *</label><div class="reasons">${Object.entries(SOURCES).map(([k, n]) => `<button class="btn btn-sm ${v.src === k ? 'on' : ''}" data-vsrc="${k}">${n}</button>`).join('')}</div></div>
+      <div class="m-grid">
+        <div class="field"><label>Скільки заплатила, ${CUR} *</label><input class="input" id="vPrice" inputmode="decimal" value="${v.price === '' ? (base || '') : esc(v.price)}" placeholder="за прайсом"></div>
+        <div class="field"><label>Оплата</label><div class="tabs" data-seg="pay"><span class="seg-ind"></span>${Object.entries(PAYS).map(([k, n]) => `<button data-vp="${k}" class="${v.pay === k ? 'on' : ''}">${n}</button>`).join('')}</div></div>
+      </div>
+      <div class="field"><label>Примітка ${price && base && price < base ? '<span style="color:var(--low)">— сума менша за прайс, напиши чому</span>' : ''}</label><input class="input" id="vNote" value="${esc(v.note)}" placeholder="наприклад, знижковий талон, корекція безкоштовно"></div>
+      ${m && m.owner ? '' : '<div class="muted" style="font-size:12px;margin-top:8px">Чайові не записуємо — вони майстра.</div>'}
+      <div class="err" id="vErr"></div>
+      <button class="btn btn-primary btn-block shine magnetic" id="doVisit" style="margin-top:10px" ${ready ? '' : 'disabled'}>Записати візит${price ? ' · ' + money(price) : ''}</button>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Що станеться</h2></div>
+      ${v.svcs.length && m ? `<div class="summary ok">
+        ${m.owner ? '<div class="sumrow"><span>Ваша робота — уся сума салону</span><b>' + money(price) + '</b></div>' : `<div class="sumrow"><span>${isMaster() ? 'Тобі' : 'Майстру'} нарахується (${m.pct}%)</span><b>${money(sal)}</b></div>`}
+        <div class="sumrow"><span>Салону залишиться</span><b>${money(price - sal - cost)}</b></div>
+        <div class="sumrow"><span>Матеріали спишуться на</span><b>${money(cost)}</b></div>
+        ${v.pay === 'cash' ? `<div class="sumrow"><span>У касу ${SALONS[v.salon].name}</span><b>+${money(price)}</b></div>` : ''}
+      </div>
+      <details class="mats"><summary>Що спишеться зі складу (${lines.length})</summary><div class="list">${lines.map(l => { const it = item(l.item), st = stockOf(l.item, v.salon);
+        return `<div class="li"><div class="grow"><div class="t">${esc(it.name)}</div><div class="s">на складі ${qtyFmt(it, st)}${st < l.q ? ' — <b style="color:var(--crit)">не вистачає</b>' : ''}</div></div><b>−${qtyFmt(it, l.q)}</b></div>`; }).join('')}</div></details>`
+      : '<div class="empty">Оберіть послугу — тут буде видно, скільки нарахується і що спишеться</div>'}
+    </div>
+  </div>`;
+}
+function doVisit() {
+  const v = visitDraft(), m = master(v.master), err = t => { document.getElementById('vErr').textContent = t; };
+  const digits = v.phone.replace(/\D/g, '');
+  if (!v.master || !v.svcs.length) return err('Оберіть майстра і послугу');
+  if (digits.length < 9) return err('Потрібен телефон клієнта (9 цифр)');
+  const price = v.price === '' ? v.svcs.reduce((a, s) => a + svc(s).price, 0) : parseFloat(String(v.price).replace(',', '.'));
+  if (!(price >= 0)) return err('Перевірте суму');
+  let c = findClientByPhone(v.salon, digits);
+  if (!c) {
+    if (!v.name.trim()) return err("Потрібне ім'я клієнта");
+    c = {id: 'c' + S.seq.c++, salon: v.salon, name: v.name.trim(), phone: digits.slice(-9), src: v.src, created: new Date().toISOString()};
+    S.clients.push(c);
+  }
+  const lines = draftLines(v);
+  lines.forEach(l => { S.W[v.salon].stock[l.item] = Math.max(0, +(stockOf(l.item, v.salon) - l.q).toFixed(3)); });
+  const rec = {id: 'v' + S.seq.v++, salon: v.salon, master: m.id, svcs: v.svcs.slice(), client: c.id, src: v.src, price, pay: v.pay, note: v.note.trim(),
+    ts: new Date().toISOString(), by: S.me, lines, hist: []};
+  S.visits.push(rec); save();
+  ui.v = null; renderNav(); render();
+  toast(m.owner ? `Візит записано: ${c.name}, ${money(price)} — уся сума салону` : `Візит записано: ${c.name}, ${money(price)}. ${isMaster() ? 'Тобі' : m.name.split(' ')[0]} +${money(price * m.pct / 100)}`, rec.id);
+}
+function undoVisit(id) {
+  const k = S.visits.findIndex(v => v.id === id);
+  if (k < 0) return;
+  const v = S.visits[k];
+  v.lines.forEach(l => { S.W[v.salon].stock[l.item] = +(stockOf(l.item, v.salon) + l.q).toFixed(3); });
+  S.visits.splice(k, 1); save(); renderNav(); render(); toast('Візит скасовано');
+}
+function editVisit(id) {
+  const v = S.visits.find(x => x.id === id);
+  if (!v || !canEditVisit(v)) return toast('Виправити можна тільки в день візиту. Далі — тільки Анастасія');
+  openModal(`<h2>Виправити візит</h2>
+    <div class="muted" style="font-size:13px">${dateFmt(v.ts)} · ${esc(master(v.master).name)} · ${esc(client(v.client).name)} · ${v.svcs.map(s => esc(svc(s).name)).join(' + ')}<br>Виправлення збережеться в історії — видно, хто і що змінив.</div>
+    <div class="m-grid"><div class="field"><label>Скільки заплатила, ${CUR}</label><input class="input" id="eSum" inputmode="decimal" value="${v.price}"></div>
+      <div class="field"><label>Оплата</label><select class="select" id="ePay">${Object.entries(PAYS).map(([k, n]) => `<option value="${k}" ${v.pay === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div></div>
+    <div class="field"><label>Примітка — чому виправляєш</label><input class="input" id="eNote" value="${esc(v.note)}" placeholder="наприклад, помилилась у сумі"></div>
+    ${v.hist.length ? `<div class="field"><label>Попередні виправлення</label>${v.hist.map(h => `<div class="muted" style="font-size:13px">${dateFmt(h.ts)} · ${esc(userName(h.by))}: ${money(h.from.price)} → ${money(h.to.price)}</div>`).join('')}</div>` : ''}
+    <div class="err" id="eErr"></div>
+    <div class="m-act"><button class="btn" data-close="1">Скасувати</button><button class="btn btn-primary" data-vesave="${v.id}">Зберегти</button></div>`);
+}
+
+/* ---------- МАЙСТРИ І ЗАРПЛАТИ (власниця) ---------- */
+function viewMasters() {
+  const ms = S.masters.filter(m => S.wh === 'all' || m.salon === S.wh).map(m => ({m, ...masterStats(m, ui.period)})).sort((a, b) => b.rev - a.rev);
+  const t = ms.reduce((a, x) => ({n: a.n + x.n, rev: a.rev + x.rev, mat: a.mat + x.mat, sal: a.sal + x.sal, adv: a.adv + x.adv, due: a.due + x.due, left: a.left + x.left}), {n: 0, rev: 0, mat: 0, sal: 0, adv: 0, due: 0, left: 0});
+  const monthly = ui.period === 'month' || ui.period === 'prev';
+  return header('Майстри і зарплати', `Хто скільки зробив і заробив · ${salonTitle()}`) + `
+  <div class="toolbar">${periodTabs()}<button class="btn" data-mnew="1">+ Новий майстер</button></div>
+  <div class="grid g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="label">Виручка</div><div class="val">${money(t.rev)}</div><div class="note">${nf0.format(t.n)} візитів</div></div>
+    <div class="card kpi"><div class="label">Зарплати майстрів</div><div class="val">${money(t.sal)}</div><div class="note">${nf1.format(t.rev ? t.sal / t.rev * 100 : 0)}% від виручки</div></div>
+    <div class="card kpi"><div class="label">${monthly ? 'Ще виплатити' : 'Аванси'}</div><div class="val">${money(monthly ? t.due : t.adv)}</div><div class="note">${monthly ? 'після авансів ' + money(t.adv) : 'взяли з каси'}</div></div>
+    <div class="card kpi"><div class="label">Салону залишається</div><div class="val">${money(t.left)}</div><div class="note">після зарплат і матеріалів</div></div>
+  </div>
+  <div class="card"><div class="tbl-wrap"><table><thead><tr><th>Майстер</th><th class="num">Візити</th><th class="num">Клієнти</th><th class="num">Виручка</th><th class="num">Сер. чек</th><th class="num">%</th><th class="num">Зарплата</th><th class="num">Аванси</th>${monthly ? '<th class="num">До виплати</th><th></th>' : ''}<th></th></tr></thead><tbody>
+    ${ms.map(x => `<tr><td><div class="name">${ava(x.m)}<div><div>${esc(x.m.name)}</div><div class="sname">${x.m.owner ? 'Власниця, сама працює' : mTitle(x.m)}${S.wh === 'all' ? ' · ' + SALONS[x.m.salon].name : ''}${x.m.owner ? '' : ' · логін ' + x.m.login}</div></div></div></td>
+      <td class="num">${nf0.format(x.n)}</td><td class="num">${nf0.format(x.clients)}</td><td class="num"><b>${money(x.rev)}</b></td><td class="num">${money(Math.round(x.avg))}</td>
+      <td class="num">${pctTxt(x.m)}</td><td class="num"><b>${x.m.owner ? '—' : money(x.sal)}</b></td><td class="num muted">${x.adv ? money(x.adv) : '—'}</td>
+      ${monthly ? `<td class="num"><b>${x.m.owner ? '—' : money(x.due)}</b></td><td>${x.m.owner ? '<span class="chip info">уся сума салону</span>' : x.due ? `<button class="btn btn-sm" data-pay="${x.m.id}">Виплатити</button>` : x.paid ? '<span class="chip ok">виплачено</span>' : ''}</td>` : ''}
+      <td class="num"><button class="btn btn-sm btn-ghost" data-mdet="${x.m.id}">Детально</button></td></tr>`).join('')}
+    <tr class="tot"><td><b>Разом</b></td><td class="num"><b>${nf0.format(t.n)}</b></td><td></td><td class="num"><b>${money(t.rev)}</b></td><td class="num">${money(Math.round(t.n ? t.rev / t.n : 0))}</td><td></td><td class="num"><b>${money(t.sal)}</b></td><td class="num">${money(t.adv)}</td>${monthly ? `<td class="num"><b>${money(t.due)}</b></td><td></td>` : ''}<td></td></tr>
+  </tbody></table></div></div>`;
+}
+function openMaster(id) {
+  const m = master(id), x = masterStats(m, ui.period), [, , pname] = periodRange(ui.period);
+  const by = {};
+  x.vs.forEach(v => v.svcs.forEach(s => { by[s] = by[s] || {n: 0, rev: 0}; by[s].n++; by[s].rev += v.price / v.svcs.length; }));
+  const hist = historyItems().filter(h => h.master === m.id).slice(0, 12);
+  openModal(`<div class="name" style="gap:12px">${ava(m)}<div><h2>${esc(m.name)}</h2><div class="muted" style="font-size:13px">${mTitle(m)} · ${SALONS[m.salon].name} · ${pname} · логін ${m.login}</div></div></div>
+    <div class="minis" style="margin-top:16px"><div><div class="label">Візитів</div><b>${x.n}</b></div><div><div class="label">Виручка</div><b>${money(x.rev)}</b></div><div><div class="label">${m.owner ? 'Середній чек' : 'Зарплата'}</div><b>${money(Math.round(m.owner ? x.avg : x.sal))}</b></div><div><div class="label">${m.owner ? 'Клієнтів' : 'Аванси'}</div><b>${m.owner ? x.clients : money(x.adv)}</b></div></div>
+    <div class="field"><label>Послуги</label><div class="list">${Object.entries(by).sort((a, b) => b[1].rev - a[1].rev).map(([s, d]) => `<div class="li"><div class="grow">${esc(svc(s).name)}</div><span class="muted">${d.n} раз</span><b style="min-width:90px;text-align:right">${money(d.rev)}</b></div>`).join('') || '<div class="muted">Немає візитів</div>'}</div></div>
+    <div class="field"><label>Історія — що вносила</label><div class="list">${hist.map(h => `<div class="li"><div class="grow"><div class="t" style="font-size:14px">${h.text}</div><div class="s">${dateFmt(h.ts)}</div></div></div>`).join('')}</div></div>
+    <div class="m-grid">${m.owner ? '<div class="field"><label>Відсоток</label><div class="muted" style="padding-top:10px">Власниця — уся сума залишається салону</div><input type="hidden" id="mPct" value="0"></div>' : `<div class="field"><label>Відсоток майстра від послуг, %</label><input class="input" id="mPct" inputmode="decimal" value="${m.pct}"></div>`}
+      <div class="field"><label>Ім'я</label><input class="input" id="mName" value="${esc(m.name)}"></div></div>
+    <div class="m-act"><button class="btn" data-close="1">Закрити</button><button class="btn btn-primary" data-msave="${m.id}">Зберегти</button></div>`);
+}
+function openPay(id) {
+  const m = master(id), x = masterStats(m, ui.period), mk = monthKey(periodRange(ui.period)[0]);
+  openModal(`<h2>Виплата готівкою</h2>
+    <div class="muted" style="font-size:13px">${esc(m.name)} · ${periodRange(ui.period)[2]}</div>
+    <div class="summary ok"><div class="sumrow"><span>Зарплата (${m.pct}%)</span><b>${money(x.sal)}</b></div><div class="sumrow"><span>Мінус аванси</span><b>−${money(x.adv)}</b></div>${x.paid ? `<div class="sumrow"><span>Уже виплачено</span><b>−${money(x.paid)}</b></div>` : ''}<div class="sumrow"><span>До виплати</span><b>${money(x.due)}</b></div></div>
+    <div class="field"><label>Виплачую, ${CUR}</label><input class="input" id="pSum" inputmode="decimal" value="${x.due}"></div>
+    <div class="m-act"><button class="btn" data-close="1">Скасувати</button><button class="btn btn-primary" data-paysave="${m.id}|${mk}">Виплатила</button></div>`);
+}
+function newMaster() {
+  openModal(`<h2>Новий майстер</h2>
+    <div class="field"><label>Ім'я *</label><input class="input" id="nmName" placeholder="наприклад, Олена Коваль" autofocus></div>
+    <div class="m-grid"><div class="field"><label>Салон</label><select class="select" id="nmSalon">${Object.entries(SALONS).map(([k, s]) => `<option value="${k}" ${k === (S.wh === 'all' ? ui.lastSalon : S.wh) ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Напрям</label><select class="select" id="nmCat">${Object.entries(CATS).filter(([k]) => k !== 'common').map(([k, c]) => `<option value="${k}">${c.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Логін для входу *</label><input class="input" id="nmLogin" placeholder="латиницею, наприклад olena" autocapitalize="none"></div>
+      <div class="field"><label>Відсоток від послуг, %</label><input class="input" id="nmPct" inputmode="decimal" value="40"></div></div>
+    <div class="muted" style="font-size:13px">Пароль у демо для всіх — 2026. У робочій версії кожна дівчинка матиме свій.</div>
+    <div class="err" id="nmErr"></div>
+    <div class="m-act"><button class="btn" data-close="1">Скасувати</button><button class="btn btn-primary" data-mcreate="1">Додати</button></div>`);
+}
+
+/* ---------- КЛІЄНТИ ---------- */
+function viewClients() {
+  const idx = clientIndex(), me = myMaster(), q = ui.clQ.trim().toLowerCase(), qd = q.replace(/\D/g, '');
+  let rows = visibleClients().map(c => ({c, ...clientInfo(c, idx)})).filter(i => i.n);
+  if (me) rows = rows.filter(i => i.vs.some(v => v.master === me.id));
+  if (q) rows = rows.filter(i => i.c.name.toLowerCase().includes(q) || (qd && i.c.phone.includes(qd)));
+  const due = rows.filter(i => i.overdue && (!me || i.lastMaster === me.id)).sort((a, b) => (b.days - b.remind) - (a.days - a.remind));
+  const tab = ui.clTab;
+  const list = tab === 'due' ? due : rows.sort((a, b) => b.last.ts.localeCompare(a.last.ts));
+  return header(me ? 'Мої клієнти' : 'Клієнти', me ? 'Тільки ті, кого ти обслуговувала' : `База клієнтів · ${salonTitle()} · хто давно не був — подзвонити й запросити`) + `
+  <div class="card">
+    <div class="toolbar"><div class="tabs" data-seg="cl"><span class="seg-ind"></span><button data-cltab="due" class="${tab === 'due' ? 'on' : ''}">Давно не були · ${due.length}</button><button data-cltab="all" class="${tab === 'all' ? 'on' : ''}">Усі · ${rows.length}</button></div>
+      <div class="tools-r"><input class="input search" id="clQ" placeholder="Пошук: ім'я або телефон" value="${esc(ui.clQ)}"></div></div>
+    ${tab === 'due' ? `<div class="hint" style="margin:0 0 12px">Нагадування за послугою: манікюр — через ${svc('man_h').remind} дн., стрижка — через ${svc('hair_w').remind} дн., вії — через ${svc('lash_cl').remind} дн. ${isOwner() ? 'Змінюється в «Послуги та норми».' : ''} Запропонуйте запис, можна зі знижкою −10%.</div>` : ''}
+    <div class="tbl-wrap"><table><thead><tr><th>Клієнт</th><th>Телефон</th><th>Остання послуга</th><th class="num">${tab === 'due' ? 'Не була' : 'Візитів'}</th><th class="num">Витратила</th>${me ? '' : '<th>Майстер</th>'}<th>Дзвінок</th><th></th></tr></thead><tbody>
+    ${list.slice(0, 150).map(i => `<tr><td><b>${esc(i.c.name)}</b><div class="sname">${SOURCES[i.c.src] || ''}</div></td><td>${phoneFmt(i.c.phone)}</td>
+      <td>${esc(svc(i.last.svcs[0]).name)}<div class="sname">${dayFmt(i.last.ts)}</div></td>
+      <td class="num">${tab === 'due' ? `<b style="color:var(--low)">${i.days} дн.</b><div class="sname">норма ${i.remind}</div>` : i.n}</td><td class="num">${money(i.sum)}</td>
+      ${me ? '' : `<td>${esc(master(i.lastMaster).name)}</td>`}
+      <td>${i.lastCall ? `<span class="chip ${i.lastCall.res === 'booked' ? 'ok' : 'mute'}">${CALLRES[i.lastCall.res]}</span><div class="sname">${dayFmt(i.lastCall.ts)} · ${esc(userName(i.lastCall.by))}</div>` : '—'}</td>
+      <td class="num"><div class="row-act"><button class="btn btn-sm" data-call="${i.c.id}">Подзвонили</button><button class="btn btn-sm btn-ghost" data-cl="${i.c.id}">Картка</button></div></td></tr>`).join('') || `<tr><td colspan="8" class="empty">${tab === 'due' ? 'Усі приходять вчасно' : 'Нікого не знайдено'}</td></tr>`}
+    </tbody></table></div></div>`;
+}
+function openCall(id) {
+  const c = client(id);
+  openModal(`<h2>Дзвінок: ${esc(c.name)}</h2><div class="muted" style="font-size:14px"><a href="tel:+48${c.phone}">${phoneFmt(c.phone)}</a></div>
+    <div class="field"><label>Що вийшло</label><div class="reasons">${Object.entries(CALLRES).map(([k, n], i) => `<button class="btn ${i === 0 ? 'on' : ''}" data-cres="${k}">${n}</button>`).join('')}</div></div>
+    <div class="field"><label>Примітка</label><input class="input" id="cNote" placeholder="наприклад, запропонували −10%, записалась на п’ятницю через Booksy"></div>
+    <div class="m-act"><button class="btn" data-close="1">Скасувати</button><button class="btn btn-primary" data-csave="${c.id}">Зберегти</button></div>`);
+}
+function openClient(id) {
+  const c = client(id), i = clientInfo(c, clientIndex());
+  openModal(`<h2>${esc(c.name)}</h2><div class="muted" style="font-size:13px">${phoneFmt(c.phone)} · ${SALONS[c.salon].name} · вперше: ${SOURCES[c.src] || '—'}</div>
+    <div class="minis" style="margin-top:14px"><div><div class="label">Візитів</div><b>${i.n}</b></div><div><div class="label">Витратила</div><b>${money(i.sum)}</b></div><div><div class="label">Середній чек</div><b>${money(i.n ? i.sum / i.n : 0)}</b></div><div><div class="label">Остання</div><b>${i.last ? i.days + ' дн.' : '—'}</b></div></div>
+    <div class="field"><label>Візити</label><div class="list">${i.vs.slice().reverse().slice(0, 10).map(v => `<div class="li"><div class="grow"><div class="t" style="font-size:14px">${v.svcs.map(s => esc(svc(s).name)).join(' + ')}</div><div class="s">${dateFmt(v.ts)} · ${esc(master(v.master).name)}${v.note ? ' · ' + esc(v.note) : ''}</div></div><b>${money(v.price)}</b></div>`).join('')}</div></div>
+    ${i.calls.length ? `<div class="field"><label>Дзвінки</label>${i.calls.map(x => `<div class="muted" style="font-size:13px">${dateFmt(x.ts)} · ${esc(userName(x.by))}: ${CALLRES[x.res]}${x.note ? ' — ' + esc(x.note) : ''}</div>`).join('')}</div>` : ''}
+    <div class="m-act"><button class="btn" data-close="1">Закрити</button><button class="btn btn-primary" data-call="${c.id}">Подзвонили</button></div>`);
+}
+
+/* ---------- КАСА ---------- */
+function viewKassa() {
+  const k = kassaState(S.wh), ks = S.kassa.filter(x => x.salon === S.wh).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 25);
+  const todayCash = S.visits.filter(v => v.salon === S.wh && v.pay === 'cash' && sameDay(v.ts)).reduce((a, v) => a + v.price, 0);
+  const label = {count: 'Перерахунок каси', take: 'Анастасія забрала', advance: 'Аванс'};
+  const tone = {count: 'accent', advance: 'low', take: 'ok'};
+  return header('Каса', `Готівка в салоні ${SALONS[S.wh].name}: скільки має бути — програма рахує сама`,
+    `<button class="btn" data-adv="1">Записати аванс</button>${isOwner() ? '<button class="btn" data-take="1">Забрала з каси</button>' : ''}<button class="btn btn-primary" data-kcount="1">Перерахувати касу</button>`) + `
+  <div class="grid g4">
+    <div class="card kpi"><div class="label">Має бути в касі зараз</div><div class="val">${money(k.expected)}</div><div class="note">перерахуйте — програма покаже, чи сходиться</div></div>
+    <div class="card kpi"><div class="label">Готівкою від клієнтів</div><div class="val">${money(k.cashIn)}</div><div class="note">з останнього перерахунку · сьогодні ${money(todayCash)}</div></div>
+    <div class="card kpi"><div class="label">Видано авансів</div><div class="val">${money(k.adv)}</div><div class="note">з останнього перерахунку</div></div>
+    <div class="card kpi"><div class="label">Останній перерахунок</div><div class="val" style="font-size:22px">${k.last ? dateFmt(k.last.ts) : '—'}</div><div class="note">${k.last ? esc(userName(k.last.by)) + ': ' + money(k.last.amount) + (k.last.expected != null && k.last.amount !== k.last.expected ? ` (різниця ${money(k.last.amount - k.last.expected)})` : '') : ''}</div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><div class="card-h"><h2>Рух готівки</h2><span class="muted" style="font-size:13px">готівка від клієнтів — в «Історія»</span></div>
+    <div class="list">${ks.map(x => `<div class="li"><span class="ico" style="background:var(--${tone[x.type]}-soft);color:var(--${tone[x.type]})">${I.cash}</span>
+      <div class="grow"><div class="t">${label[x.type]}${x.master ? ': ' + esc(master(x.master).name) : ''} · ${x.type === 'count' ? money(x.amount) : '−' + money(x.amount)}${x.type === 'count' && x.expected != null && Math.abs(x.amount - x.expected) > .01 ? ` <span class="chip crit">різниця ${money(x.amount - x.expected)}</span>` : ''}</div>
+      <div class="s">${dateFmt(x.ts)} · записала ${esc(userName(x.by))}${x.note ? ' · ' + esc(x.note) : ''}</div></div>
+      ${x.type === 'advance' ? (x.ok ? '<span class="chip ok">погоджено</span>' : isOwner() ? `<button class="btn btn-sm" data-kok="${x.id}">Погоджено</button>` : '<span class="chip mute">чекає</span>') : ''}</div>`).join('')}</div></div>`;
+}
+function openCount() {
+  const k = kassaState(S.wh);
+  openModal(`<h2>Перерахувати касу</h2><div class="muted" style="font-size:13px">${SALONS[S.wh].name} · за програмою має бути <b>${money(k.expected)}</b></div>
+    <div class="field"><label>Скільки по факту, ${CUR}</label><input class="input" id="cntSum" inputmode="decimal" autofocus></div>
+    <div class="field"><label>Примітка</label><input class="input" id="cntNote" placeholder="наприклад, перерахунок увечері"></div>
+    <div class="m-act"><button class="btn" data-close="1">Скасувати</button><button class="btn btn-primary" data-cntsave="1">Зберегти</button></div>`);
+}
+function openTake() {
+  openModal(`<h2>Забрала з каси</h2><div class="muted" style="font-size:13px">${SALONS[S.wh].name}</div>
+    <div class="field"><label>Сума, ${CUR}</label><input class="input" id="tkSum" inputmode="decimal" autofocus></div>
+    <div class="m-act"><button class="btn" data-close="1">Скасувати</button><button class="btn btn-primary" data-tksave="1">Зберегти</button></div>`);
+}
+
+/* ---------- ТРЕБА КУПИТИ ---------- */
+function viewReqs() {
+  const r = ui.req, sal = isMaster() ? myMaster().salon : S.wh;
+  const open = openReqs().sort((a, b) => (b.urgent - a.urgent) || b.ts.localeCompare(a.ts));
+  const done = S.reqs.filter(x => x.done && (isMaster() ? x.salon === sal : S.wh === 'all' || x.salon === S.wh)).sort((a, b) => b.done.ts.localeCompare(a.done.ts)).slice(0, 8);
+  const row = x => `<div class="li"><span class="ico" style="background:var(--${x.urgent && !x.done ? 'crit' : 'low'}-soft);color:var(--${x.urgent && !x.done ? 'crit' : 'low'})">${I.bag}</span>
+    <div class="grow"><div class="t">${esc(x.item ? item(x.item).name : x.text)}${x.qty ? ' — ' + esc(x.qty) : ''}${x.urgent && !x.done ? ' <span class="chip crit">терміново</span>' : ''}</div>
+    <div class="s">${esc(userName(x.by))} · ${dateFmt(x.ts)}${S.wh === 'all' && !isMaster() ? ' · ' + SALONS[x.salon].name : ''}${x.item && x.text ? ' · ' + esc(x.text) : ''}${x.done ? ' · куплено ' + dateFmt(x.done.ts) + ' (' + esc(userName(x.done.by)) + ')' : ''}</div></div>
+    ${!x.done && !isMaster() ? `<button class="btn btn-sm" data-rdone="${x.id}">Куплено</button>` : ''}</div>`;
+  return header('Треба купити', isMaster() ? 'Щось закінчилось — відміть тут, Анастасія одразу побачить. Дзвонити не треба' : `Що просять купити дівчата · ${salonTitle()}`) + `
+  <div class="grid g32">
+    <div class="card"><div class="card-h"><h2>Потрібно купити · ${open.length}</h2></div><div class="list">${open.map(row).join('') || '<div class="empty">Нічого не треба</div>'}</div>
+      ${done.length ? `<div class="card-h" style="margin-top:18px"><h2 style="font-size:16px">Уже куплено</h2></div><div class="list">${done.map(row).join('')}</div>` : ''}</div>
+    <div class="card"><div class="card-h"><h2>Закінчилось / треба купити</h2></div>
+      ${isMaster() || S.wh !== 'all' ? `<div class="field" style="margin-top:0"><label>Вибери зі списку…</label>${combo('req', S.items, r.item)}</div>
+      <div class="field"><label>…або напиши своє</label><input class="input" id="rqText" value="${esc(r.text)}" placeholder="наприклад, пінцет для вій"></div>
+      <div class="field"><label>Скільки</label><input class="input" id="rqQty" value="${esc(r.qty)}" placeholder="наприклад, 2 шт"></div>
+      <label class="check"><input type="checkbox" id="rqUrg" ${r.urgent ? 'checked' : ''}> Терміново — закінчиться сьогодні-завтра</label>
+      <button class="btn btn-primary btn-block" id="doReq" style="margin-top:14px">Відправити Анастасії</button>` : '<div class="muted">Оберіть салон угорі, щоб додати</div>'}
+    </div>
+  </div>`;
+}
+
+/* ---------- СКЛАД (додатково) ---------- */
+function viewStock() {
+  const q = ui.search.trim().toLowerCase();
+  const rows = S.items.filter(i => i.cat === ui.stockTab && (!q || i.name.toLowerCase().includes(q)));
+  const key = {name: i => i.name, use: i => usagePerDay(i.id), days: i => daysLeft(i.id), st: i => ({crit: 0, low: 1, ok: 2})[status(i.id)]}[ui.sort.key];
+  if (key) rows.sort((a, b) => { const x = key(a), y = key(b); return (typeof x === 'string' ? x.localeCompare(y, 'uk') : x - y) * ui.sort.dir; });
+  const th = (k, label, num) => `<th class="${num ? 'num' : ''}" data-sort="${k}">${label}${ui.sort.key === k ? `<span class="arr">${ui.sort.dir > 0 ? '↑' : '↓'}</span>` : ''}</th>`;
+  const value = S.items.reduce((a, i) => a + stockOf(i.id) * unitPrice(i), 0);
+  return header('Склад', `Матеріали ${salonTitle()} на ${money(value)} · кожен візит списує матеріали сам, за нормами послуг`) + `
+  <div class="card">
+    <div class="toolbar"><div class="tabs" data-seg="st"><span class="seg-ind"></span>${Object.entries(CATS).map(([k, c]) => `<button data-tab="${k}" class="${ui.stockTab === k ? 'on' : ''}">${c.short}</button>`).join('')}</div>
+      <div class="tools-r"><input class="input search" id="search" placeholder="Пошук матеріалу" value="${esc(ui.search)}"><button class="btn btn-primary" data-iedit="new">+ Новий матеріал</button></div></div>
+    <div class="tbl-wrap"><table><thead><tr>${th('name', 'Матеріал')}<th class="num">Залишок</th><th class="num">Мінімум</th><th>Запас</th>${th('use', 'Витрата в день', 1)}${th('days', 'Вистачить на', 1)}${th('st', 'Статус')}<th></th></tr></thead><tbody>
+    ${rows.map(i => { const st = status(i.id), s = stockOf(i.id), mn = minOf(i.id), pct = Math.min(100, s / (mn * 2 || 1) * 100);
+      return `<tr><td><div><div>${esc(i.name)}</div><div class="sname">${esc(i.sup)} · уп. ${nf1.format(i.pack.size)} ${i.unit} = ${money(i.pack.price)}</div></div></td>
+      <td class="num"><b>${qtyFmt(i, s)}</b><div class="sname">${packsFmt(i, s)}</div></td><td class="num muted">${qtyFmt(i, mn)}</td>
+      <td><div class="bar"><i class="${st === 'crit' ? 'striped' : ''}" style="width:${pct}%;background:var(--${st})"></i></div></td>
+      <td class="num">${qtyFmt(i, usagePerDay(i.id))}</td><td class="num">${daysTxt(daysLeft(i.id))}</td><td>${chip(st)}</td>
+      <td class="num"><div class="row-act"><button class="btn btn-sm" data-rec="${i.id}">Прихід</button><button class="btn btn-sm btn-ghost" data-iedit="${i.id}">✎</button></div></td></tr>`; }).join('') || '<tr><td colspan="8" class="empty">Нічого не знайдено</td></tr>'}
+    </tbody></table></div></div>`;
+}
+function editItem(id) {
+  const it = id === 'new' ? {id: '', cat: ui.stockTab, name: '', unit: 'мл', pack: {size: '', price: ''}, sup: ''} : item(id);
+  openModal(`<h2>${it.id ? 'Матеріал' : 'Новий матеріал'}</h2>
+    <div class="field"><label>Назва *</label><input class="input" id="iName" value="${esc(it.name)}" placeholder="наприклад, Гель-лак червоний" autofocus></div>
+    <div class="m-grid">
+      <div class="field"><label>Розділ</label><select class="select" id="iCat">${Object.entries(CATS).map(([k, c]) => `<option value="${k}" ${it.cat === k ? 'selected' : ''}>${c.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Одиниця</label><select class="select" id="iUnit">${['мл', 'г', 'шт', 'пара', 'лоток', 'саше'].map(u => `<option ${it.unit === u ? 'selected' : ''}>${u}</option>`).join('')}</select></div>
+      <div class="field"><label>Упаковка — скільки в ній</label><input class="input" id="iSize" inputmode="decimal" value="${it.pack.size}"></div>
+      <div class="field"><label>Ціна упаковки, ${CUR}</label><input class="input" id="iPrice" inputmode="decimal" value="${it.pack.price}"></div>
+      <div class="field"><label>Постачальник</label><input class="input" id="iSup" value="${esc(it.sup)}"></div>
+      <div class="field"><label>Мінімум на складі</label><input class="input" id="iMin" inputmode="decimal" value="${it.id ? minOf(it.id) : ''}"></div>
+    </div>
+    <div class="err" id="iErr"></div>
+    <div class="m-act"><button class="btn" data-close="1">Скасувати</button><button class="btn btn-primary" data-isave="${it.id || 'new'}">Зберегти</button></div>`);
+}
+function saveItem(id) {
+  const g = x => document.getElementById(x).value.trim(), n = x => parseFloat(g(x).replace(',', '.'));
+  if (!g('iName')) { document.getElementById('iErr').textContent = 'Потрібна назва'; return; }
+  if (!(n('iSize') > 0) || !(n('iPrice') >= 0)) { document.getElementById('iErr').textContent = 'Перевірте упаковку та ціну'; return; }
+  let it = id === 'new' ? null : item(id);
+  if (!it) {
+    it = {id: 'i' + Date.now().toString(36), cat: g('iCat'), name: '', unit: '', pack: {}, sup: ''};
+    S.items.push(it); Object.keys(SALONS).forEach(s => { S.W[s].stock[it.id] = 0; S.W[s].min[it.id] = 0; });
+  }
+  Object.assign(it, {name: g('iName'), cat: g('iCat'), unit: g('iUnit'), pack: {size: n('iSize'), price: n('iPrice')}, sup: g('iSup')});
+  S.W[S.wh].min[it.id] = n('iMin') >= 0 ? n('iMin') : 0;
+  save(); closeModal(); ui.stockTab = it.cat; renderNav(); render(); toast('Матеріал збережено');
+}
+function viewReceipt() {
+  const r = ui.rec, it = item(r.item), packs = parseFloat(String(r.packs).replace(',', '.')) || 0;
+  const price = r.price === '' ? it.pack.price : parseFloat(String(r.price).replace(',', '.')) || 0;
+  const recent = S.ops.filter(o => o.type === 'receipt' && o.salon === S.wh).slice().sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 8);
+  return header('Прихід', `Привезли матеріали — додайте, і склад ${salonTitle()} оновиться`) + `
+  <div class="grid g32">
+    <div class="card">
+      <div class="field" style="margin-top:0"><label>Матеріал</label>${combo('rec', S.items, r.item)}</div>
+      <div class="m-grid">
+        <div class="field"><label>Скільки упаковок (по ${nf1.format(it.pack.size)} ${it.unit})</label><div class="qty"><button class="btn" data-rq="-1">−</button><input class="input" id="rPacks" inputmode="decimal" value="${esc(r.packs)}"><button class="btn" data-rq="1">+</button></div></div>
+        <div class="field"><label>Ціна за упаковку, ${CUR}</label><input class="input" id="rPrice" inputmode="decimal" value="${r.price === '' ? it.pack.price : esc(r.price)}"></div>
+      </div>
+      <div class="field"><label>Постачальник</label><input class="input" id="rSup" value="${esc(r.sup || it.sup)}"></div>
+      <div class="summary ok"><div class="sumrow"><span>На склад додасться</span><b>+${qtyFmt(it, packs * it.pack.size)}</b></div>
+        <div class="sumrow"><span>Буде на складі</span><b>${qtyFmt(it, stockOf(it.id) + packs * it.pack.size)}</b></div>
+        <div class="sumrow"><span>Сума</span><b>${money(packs * price)}</b></div></div>
+      <button class="btn btn-primary btn-block shine magnetic" id="doRec" style="margin-top:14px" ${packs > 0 ? '' : 'disabled'}>Додати прихід</button>
+    </div>
+    <div class="card"><div class="card-h"><h2>Останні поставки</h2></div><div class="list">${recent.map(opRow).join('') || '<div class="empty">Ще не було</div>'}</div></div>
+  </div>`;
+}
+function doReceipt() {
+  const r = ui.rec, it = item(r.item), packs = parseFloat(String(r.packs).replace(',', '.'));
+  const price = r.price === '' ? it.pack.price : parseFloat(String(r.price).replace(',', '.'));
+  if (!(packs > 0)) return;
+  const q = packs * it.pack.size;
+  S.W[S.wh].stock[it.id] = +(stockOf(it.id) + q).toFixed(3);
+  if (price >= 0) it.pack.price = price;
+  S.ops.push({id: 'o' + S.seq.o++, type: 'receipt', salon: S.wh, sup: r.sup || it.sup, ts: new Date().toISOString(), by: S.me, lines: [{item: it.id, q, packs, cost: packs * price}]});
+  save(); ui.rec = {item: it.id, packs: 2, sup: '', price: ''}; renderNav(); render(); toast(`Прихід: ${it.name} +${qtyFmt(it, q)}`);
+}
+function opRow(o) {
+  return `<div class="li"><span class="ico" style="background:var(--ok-soft);color:var(--ok)">${I.in}</span><div class="grow"><div class="t">Прихід: ${o.lines.map(l => `${esc(item(l.item).name)} +${qtyFmt(item(l.item), l.q)}`).join(', ')}</div>
+    <div class="s">${dateFmt(o.ts)} · ${esc(o.sup || '')} · ${money(o.lines.reduce((a, l) => a + (l.cost || 0), 0))}</div></div></div>`;
+}
+function buyRows() {
+  return S.items.filter(i => status(i.id) !== 'ok').map(i => {
+    const need = Math.max(minOf(i.id) * 2 + usagePerDay(i.id) * 14 - stockOf(i.id), i.pack.size);
+    const packs = Math.ceil(need / i.pack.size);
+    return {i, packs, cost: packs * i.pack.price, st: status(i.id)};
+  });
+}
+function viewBuy() {
+  const rows = buyRows(), groups = {};
+  rows.forEach(r => { (groups[r.i.sup] = groups[r.i.sup] || []).push(r); });
+  const total = rows.reduce((a, r) => a + r.cost, 0);
+  return header('Закупівля', `Що пора замовити для ${salonTitle()} — з розрахунку на 2 тижні роботи`, rows.length ? `<button class="btn" id="copyAll">Скопіювати все замовлення</button>` : '') +
+  (rows.length ? `<div class="grid g4" style="margin-bottom:16px"><div class="card kpi alert"><div class="label">Позицій замовити</div><div class="val">${rows.length}</div><div class="note">терміново: ${rows.filter(r => r.st === 'crit').length}</div></div>
+    <div class="card kpi"><div class="label">Сума замовлення</div><div class="val">${money(total)}</div><div class="note">за поточними цінами</div></div>
+    <div class="card kpi"><div class="label">Постачальників</div><div class="val">${Object.keys(groups).length}</div><div class="note">окреме замовлення кожному</div></div></div>` +
+  Object.entries(groups).map(([sup, rs]) => `<div class="card sup-card"><div class="card-h"><h2>${esc(sup)}</h2><button class="btn btn-sm" data-copysup="${esc(sup)}">Скопіювати замовлення</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Матеріал</th><th class="num">Залишок</th><th class="num">Вистачить на</th><th class="num">Замовити</th><th class="num">Сума</th><th>Статус</th></tr></thead><tbody>
+    ${rs.map(r => `<tr><td>${esc(r.i.name)}</td><td class="num">${qtyFmt(r.i, stockOf(r.i.id))}</td><td class="num">${daysTxt(daysLeft(r.i.id))}</td><td class="num"><b>${r.packs} уп.</b><div class="sname">по ${nf1.format(r.i.pack.size)} ${r.i.unit}</div></td><td class="num">${money(r.cost)}</td><td>${chip(r.st)}</td></tr>`).join('')}
+    </tbody></table></div></div>`).join('') : '<div class="card"><div class="empty">Усього вистачає — замовляти нічого не треба</div></div>');
+}
+function orderText(sup) {
+  const rows = buyRows().filter(r => !sup || r.i.sup === sup), groups = {};
+  rows.forEach(r => { (groups[r.i.sup] = groups[r.i.sup] || []).push(r); });
+  return Object.entries(groups).map(([s, rs]) => `Замовлення WEISS (${SALONS[S.wh].name}) — ${s}:\n` + rs.map(r => `• ${r.i.name} — ${r.packs} уп. по ${nf1.format(r.i.pack.size)} ${r.i.unit}`).join('\n')).join('\n\n');
+}
+function copyText(t, msg) {
+  const done = () => toast(msg);
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, () => fallbackCopy(t, done)); else fallbackCopy(t, done);
+}
+function fallbackCopy(t, done) {
+  const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select();
+  try { document.execCommand('copy'); done(); } catch (e) { openModal(`<h2>Замовлення</h2><textarea class="input" style="height:240px;padding:12px">${esc(t)}</textarea><div class="m-act"><button class="btn" data-close="1">Закрити</button></div>`); }
+  a.remove();
+}
+
+/* ---------- ПОСЛУГИ ТА НОРМИ ---------- */
+function viewServices() {
+  return header('Послуги та норми', 'Ціна, через скільки днів нагадати клієнту і скільки матеріалу йде на послугу. Однаково для обох салонів') +
+  Object.entries(CATS).filter(([k]) => S.services.some(s => s.cat === k)).map(([k, c]) => `<div class="card" style="margin-bottom:16px"><div class="card-h"><h2>${c.name}</h2>${k === 'nails' ? '<button class="btn btn-sm" data-sedit="new">+ Нова послуга</button>' : ''}</div>
+    <div class="tbl-wrap"><table><thead><tr><th>Послуга</th><th class="num">Ціна</th><th class="num">Нагадати через</th><th>На 1 послугу йде</th><th class="num">Матеріали</th><th></th></tr></thead><tbody>
+    ${S.services.filter(s => s.cat === k).map(s => { const cost = linesCost(s.mats);
+      return `<tr><td><b>${esc(s.name)}</b></td><td class="num">${money(s.price)}</td><td class="num">${s.remind ? s.remind + ' дн.' : '<span class="muted">не нагадувати</span>'}</td>
+      <td><div class="formula" style="margin-top:0">${s.mats.map(l => `<span class="pill">${esc(item(l.item).name)} · ${qtyFmt(item(l.item), l.q)}</span>`).join('')}</div></td>
+      <td class="num">${money(cost)}<div class="sname">${nf1.format(s.price ? cost / s.price * 100 : 0)}% ціни</div></td><td class="num"><button class="btn btn-sm btn-ghost" data-sedit="${s.id}">✎</button></td></tr>`; }).join('')}
+    </tbody></table></div></div>`).join('');
+}
+function openService(id) {
+  const s = id === 'new' ? {id: '', cat: 'nails', name: '', price: '', min: 60, remind: 28, mats: []} : svc(id);
+  ui.sedit = {id: s.id, cat: s.cat, name: s.name, price: s.price, min: s.min, remind: s.remind, mats: s.mats.map(l => ({...l}))};
+  renderService();
+}
+function renderService() {
+  const e = ui.sedit;
+  openModal(`<h2>${e.id ? 'Послуга' : 'Нова послуга'}</h2>
+    <div class="field"><label>Назва *</label><input class="input" id="sName" value="${esc(e.name)}" placeholder="наприклад, Манікюр японський"></div>
+    <div class="m-grid">
+      <div class="field"><label>Розділ</label><select class="select" id="sCat">${Object.entries(CATS).filter(([k]) => k !== 'common').map(([k, c]) => `<option value="${k}" ${e.cat === k ? 'selected' : ''}>${c.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Ціна, ${CUR}</label><input class="input" id="sPrice" inputmode="decimal" value="${e.price}"></div>
+      <div class="field"><label>Нагадати клієнту через, днів (0 — не нагадувати)</label><input class="input" id="sRemind" inputmode="numeric" value="${e.remind}"></div>
+    </div>
+    <div class="field"><label>Що йде на 1 послугу</label><div class="lines">${e.mats.map((l, k) => `<div class="line-row"><select class="select" data-smi="${k}">${S.items.map(i => `<option value="${i.id}" ${i.id === l.item ? 'selected' : ''}>${esc(i.name)} (${i.unit})</option>`).join('')}</select>
+      <input class="input" style="width:90px" data-smq="${k}" inputmode="decimal" value="${l.q}"><span class="muted">${item(l.item).unit}</span><button class="btn btn-sm btn-ghost" data-smdel="${k}">✕</button></div>`).join('')}
+      <button class="btn btn-sm" data-smadd="1">+ Додати матеріал</button></div></div>
+    <div class="err" id="sErr"></div>
+    <div class="m-act"><button class="btn" data-close="1">Скасувати</button><button class="btn btn-primary" data-ssave="1">Зберегти</button></div>`);
+}
+function syncService() {
+  const e = ui.sedit, g = id => document.getElementById(id);
+  e.name = g('sName').value; e.cat = g('sCat').value; e.price = g('sPrice').value; e.remind = g('sRemind').value;
+  document.querySelectorAll('[data-smi]').forEach(el => { e.mats[+el.dataset.smi].item = el.value; });
+  document.querySelectorAll('[data-smq]').forEach(el => { e.mats[+el.dataset.smq].q = el.value; });
+}
+function saveService() {
+  syncService();
+  const e = ui.sedit, price = parseFloat(String(e.price).replace(',', '.')), remind = parseInt(e.remind, 10) || 0;
+  const mats = e.mats.map(l => ({item: l.item, q: parseFloat(String(l.q).replace(',', '.'))}));
+  if (!e.name.trim()) { document.getElementById('sErr').textContent = 'Потрібна назва'; return; }
+  if (!(price >= 0) || mats.some(l => !(l.q > 0))) { document.getElementById('sErr').textContent = 'Перевірте ціну та кількості'; return; }
+  let s = e.id ? svc(e.id) : null;
+  if (!e.id) { s = {id: 's' + Date.now().toString(36)}; S.services.push(s); S.masters.filter(m => m.cat === e.cat).forEach(m => m.svcs.push(s.id)); }
+  Object.assign(s, {name: e.name.trim(), cat: e.cat, price, min: e.min || 60, remind, mats});
+  save(); closeModal(); ui.sedit = null; render(); toast('Послугу збережено');
+}
+
+/* ---------- ІСТОРІЯ (хто що вносив) ---------- */
+function historyItems() {
+  const out = [];
+  const okSalon = s => isMaster() ? s === myMaster().salon : S.wh === 'all' || s === S.wh;
+  const masterOf = login => (S.users.find(u => u.login === login) || {}).master;
+  S.visits.forEach(v => {
+    if (!okSalon(v.salon)) return;
+    out.push({ts: v.ts, kind: 'visit', master: v.master, by: v.by, text: `Візит: ${v.svcs.map(s => esc(svc(s).name)).join(' + ')} — ${money(v.price)} (${PAYS[v.pay]}), ${esc(client(v.client).name)}${v.note ? ' · <i>' + esc(v.note) + '</i>' : ''}`, v});
+    v.hist.forEach(h => out.push({ts: h.ts, kind: 'edit', master: v.master, by: h.by, text: `Виправлено візит ${dayFmt(v.ts)} (${esc(client(v.client).name)}): ${money(h.from.price)} → <b>${money(h.to.price)}</b>${h.from.pay !== h.to.pay ? `, ${PAYS[h.from.pay]} → ${PAYS[h.to.pay]}` : ''}${h.to.note ? ' · ' + esc(h.to.note) : ''}`}));
+  });
+  S.kassa.filter(k => k.type === 'advance' && okSalon(k.salon)).forEach(k => out.push({ts: k.ts, kind: 'advance', master: k.master, by: k.by, text: `Аванс з каси: ${esc(master(k.master).name)} — ${money(k.amount)}${k.ok ? ' ✓ погоджено' : ''}`}));
+  S.calls.forEach(c => { const cl = client(c.client); if (okSalon(cl.salon)) out.push({ts: c.ts, kind: 'call', master: masterOf(c.by), by: c.by, text: `Дзвінок: ${esc(cl.name)} — ${CALLRES[c.res]}${c.note ? ' · ' + esc(c.note) : ''}`}); });
+  S.reqs.filter(r => okSalon(r.salon)).forEach(r => {
+    out.push({ts: r.ts, kind: 'req', master: masterOf(r.by), by: r.by, text: `Треба купити: ${esc(r.item ? item(r.item).name : r.text)}${r.qty ? ' — ' + esc(r.qty) : ''}`});
+    if (r.done) out.push({ts: r.done.ts, kind: 'req', by: r.done.by, text: `Куплено: ${esc(r.item ? item(r.item).name : r.text)}`});
+  });
+  return out.filter(h => !isMaster() || h.master === myMaster().id || h.by === S.me).sort((a, b) => b.ts.localeCompare(a.ts));
+}
+function viewLog() {
+  const f = ui.logFilter, mf = isOwner() ? ui.logMaster : '';
+  let items = historyItems().filter(h => f === 'all' || h.kind === f);
+  if (mf) items = items.filter(h => h.master === mf);
+  const ms = S.masters.filter(m => S.wh === 'all' || m.salon === S.wh);
+  const icon = {visit: ['accent', 'plus'], edit: ['low', 'pen'], advance: ['low', 'cash'], call: ['ok', 'phone'], req: ['crit', 'bag']};
+  return header(isMaster() ? 'Моя історія' : 'Історія', isMaster() ? 'Усе, що ти вносила' : `Хто що вносив — можна перевірити кожну дівчинку · ${salonTitle()}`) + `
+  <div class="card"><div class="toolbar"><div class="tabs" data-seg="log"><span class="seg-ind"></span>${[['all', 'Усе'], ['visit', 'Візити'], ['edit', 'Виправлення'], ['advance', 'Аванси'], ['call', 'Дзвінки'], ['req', 'Покупки']].map(([k, n]) => `<button data-log="${k}" class="${f === k ? 'on' : ''}">${n}</button>`).join('')}</div>
+    ${isOwner() ? `<select class="select" id="logM" style="width:auto;min-width:220px"><option value="">Усі дівчата</option>${ms.map(m => `<option value="${m.id}" ${mf === m.id ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select>` : ''}</div>
+  <div class="list">${items.slice(0, 150).map(h => { const [c, ic] = icon[h.kind];
+    return `<div class="li"><span class="ico" style="background:var(--${c}-soft);color:var(--${c})">${I[ic]}</span><div class="grow"><div class="t">${h.text}</div><div class="s">${dateFmt(h.ts)} · вніс(ла): ${esc(userName(h.by))}</div></div>
+    ${h.v && canEditVisit(h.v) ? `<button class="btn btn-sm btn-ghost" data-vedit="${h.v.id}">✎</button>` : ''}</div>`; }).join('') || '<div class="empty">Порожньо</div>'}</div></div>`;
+}
+
+/* ---------- пошук-вибір ---------- */
+const COMBO = {};
+function combo(key, items, value) {
+  COMBO[key] = {items, value};
+  const cur = items.find(i => i.id === value);
+  return `<div class="combo" data-combo="${key}"><span class="combo-ico">⌕</span>
+    <input class="input combo-in" data-combo-in="${key}" value="${esc(cur ? cur.name : '')}" placeholder="Почніть вводити назву…" autocomplete="off" spellcheck="false">
+    <div class="combo-list hidden" data-combo-list="${key}"></div></div>`;
+}
+function fillCombo(key, query) {
+  const c = COMBO[key], list = document.querySelector(`[data-combo-list="${key}"]`);
+  if (!c || !list) return;
+  const q = String(query || '').toLowerCase().trim(), sal = isMaster() ? myMaster().salon : S.wh;
+  let html = '';
+  Object.entries(CATS).forEach(([k, cat]) => {
+    const opts = c.items.filter(i => i.cat === k && i.name.toLowerCase().includes(q));
+    if (opts.length) html += `<div class="combo-g">${cat.name}</div>` + opts.map(o => `<button type="button" class="combo-opt ${o.id === c.value ? 'sel' : ''}" data-pick="${key}" data-v="${o.id}"><span class="combo-n">${esc(o.name)}</span><span class="combo-note">${sal !== 'all' ? qtyFmt(o, stockOf(o.id, sal)) : ''}</span></button>`).join('');
+  });
+  list.innerHTML = html || '<div class="combo-empty">Нічого не знайдено</div>';
+  list.classList.remove('hidden');
+}
+function closeCombos() { document.querySelectorAll('.combo-list').forEach(l => l.classList.add('hidden')); }
+document.addEventListener('focusin', e => { const k = e.target.dataset && e.target.dataset.comboIn; if (k) { e.target.select(); fillCombo(k, ''); } });
+document.addEventListener('pointerdown', e => { if (!e.target.closest('.combo')) closeCombos(); });
+
+/* ---------- вікно ---------- */
+function openModal(html) {
+  const m = document.getElementById('modal');
+  m.innerHTML = html; m.classList.remove('hidden'); document.getElementById('modalBg').classList.remove('hidden');
+  const f = m.querySelector('[autofocus]'); if (f) setTimeout(() => f.focus(), 60);
+}
+function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modalBg').classList.add('hidden'); }
+
+/* ---------- загальне ---------- */
+const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function render(animate) {
+  const v = {dash: viewDash, me: viewMe, visit: viewVisit, masters: viewMasters, clients: viewClients, kassa: viewKassa, reqs: viewReqs,
+    stock: viewStock, receipt: viewReceipt, buy: viewBuy, services: viewServices, log: viewLog}[current];
+  const el = document.getElementById('view');
+  el.innerHTML = v();
+  el.classList.toggle('enter', !!animate);
+  if (animate) {
+    el.querySelectorAll('.card').forEach((c, i) => { c.style.animationDelay = i * 45 + 'ms'; });
+    if (!calm) el.querySelectorAll('[data-count]').forEach(countUp);
+  }
+  segments();
+  el.querySelectorAll('table').forEach(t => {
+    const heads = [...t.querySelectorAll('thead th')].map(th => th.textContent.replace(/[↑↓]/g, '').trim());
+    t.querySelectorAll('tbody tr').forEach(tr => [...tr.children].forEach((td, i) => td.setAttribute('data-label', heads[i] || '')));
+  });
+}
+function rerenderKeep(id) {
+  const a = document.getElementById(id), pos = a ? a.selectionStart : null;
+  render();
+  const b = document.getElementById(id); if (b) { b.focus(); if (pos != null) try { b.setSelectionRange(pos, pos); } catch (e) {} }
+}
+function countUp(node) {
+  const to = Number(node.dataset.count), t0 = performance.now(), dur = 1100;
+  const tick = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); node.textContent = nf0.format(Math.round(to * e)); if (k < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+const segPos = {};
+function segments() {
+  document.querySelectorAll('.tabs[data-seg]').forEach(tabs => {
+    const ind = tabs.querySelector('.seg-ind'), on = tabs.querySelector('button.on');
+    if (!ind || !on) return;
+    const id = tabs.dataset.seg, prev = segPos[id], next = {left: on.offsetLeft, width: on.offsetWidth};
+    if (prev && !calm) { ind.style.left = prev.left + 'px'; ind.style.width = prev.width + 'px'; void ind.offsetWidth; ind.classList.add('anim'); }
+    ind.style.left = next.left + 'px'; ind.style.width = next.width + 'px'; segPos[id] = next;
+  });
+}
+document.addEventListener('pointermove', e => {
+  const b = e.target.closest && e.target.closest('.magnetic');
+  document.querySelectorAll('.magnetic').forEach(m => { if (m !== b) m.style.transform = ''; });
+  if (!b || b.disabled || calm) return;
+  const r = b.getBoundingClientRect();
+  b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.06}px, ${(e.clientY - r.top - r.height / 2) * 0.18}px)`;
+});
+let toastTimer;
+function toast(msg, undoId) {
+  const t = document.getElementById('toast');
+  t.classList.remove('show');
+  t.innerHTML = `<div class="t-msg">${esc(msg)}</div>${undoId ? `<button class="t-act" data-undo="${undoId}">Скасувати</button>` : ''}<i class="t-bar"></i>`;
+  const dur = undoId ? 6500 : 4200;
+  t.style.setProperty('--dur', dur + 'ms'); void t.offsetWidth; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), dur);
+}
+const num = id => parseFloat(String(document.getElementById(id).value).replace(',', '.'));
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-go],[data-wh],[data-per],[data-tab],[data-sort],[data-vm],[data-vs],[data-vp],[data-vsrc],#doVisit,[data-undo],[data-vedit],[data-vesave],[data-mdet],[data-msave],[data-mnew],[data-mcreate],[data-pay],[data-paysave],[data-adv],[data-asave],[data-kok],[data-kcount],[data-cntsave],[data-take],[data-tksave],[data-cltab],[data-call],[data-cres],[data-csave],[data-cl],[data-rdone],#doReq,[data-rec],[data-rq],#doRec,[data-pick],[data-iedit],[data-isave],[data-sedit],[data-ssave],[data-smadd],[data-smdel],[data-copysup],#copyAll,[data-log],[data-close],[data-more],[data-logout],[data-reset],[data-demo]');
+  if (!el) return;
+  const d = el.dataset;
+  if (d.demo) { document.getElementById('lg').value = d.demo; document.getElementById('pw').value = '2026'; return document.getElementById('loginForm').requestSubmit(); }
+  if (d.go) return go(d.go);
+  if (d.wh) { S.wh = d.wh; if (d.wh !== 'all') ui.lastSalon = d.wh; ui.v = null; save(); renderNav(); return render(); }
+  if (d.per) { ui.period = d.per; return render(); }
+  if (d.tab) { ui.stockTab = d.tab; ui.sort = {key: '', dir: 1}; return render(); }
+  if (d.sort) { ui.sort = {key: d.sort, dir: ui.sort.key === d.sort ? -ui.sort.dir : 1}; return render(); }
+  if (d.vm) { const v = visitDraft(); if (v.master !== d.vm) { v.master = d.vm; v.svcs = []; v.price = ''; } return render(); }
+  if (d.vs) { const v = visitDraft(); v.svcs = v.svcs.includes(d.vs) ? v.svcs.filter(x => x !== d.vs) : v.svcs.concat(d.vs); v.price = ''; return render(); }
+  if (d.vp) { visitDraft().pay = d.vp; return render(); }
+  if (d.vsrc) { visitDraft().src = d.vsrc; return render(); }
+  if (el.id === 'doVisit') return doVisit();
+  if (d.undo) { document.getElementById('toast').classList.remove('show'); return undoVisit(d.undo); }
+  if (d.vedit) return editVisit(d.vedit);
+  if (d.vesave) {
+    const v = S.visits.find(x => x.id === d.vesave), sum = num('eSum');
+    if (!(sum >= 0)) { document.getElementById('eErr').textContent = 'Перевірте суму'; return; }
+    const to = {price: sum, pay: document.getElementById('ePay').value, note: document.getElementById('eNote').value.trim()};
+    if (to.price === v.price && to.pay === v.pay && to.note === v.note) return closeModal();
+    v.hist.push({ts: new Date().toISOString(), by: S.me, from: {price: v.price, pay: v.pay, note: v.note}, to});
+    Object.assign(v, to); save(); closeModal(); render(); return toast('Виправлено — зміна записана в історію');
+  }
+  if (d.mdet) return openMaster(d.mdet);
+  if (d.msave) {
+    const m = master(d.msave), pct = num('mPct');
+    if (pct >= 0 && pct <= 100) m.pct = pct;
+    m.name = document.getElementById('mName').value.trim() || m.name;
+    const u = S.users.find(x => x.master === m.id); if (u) u.name = m.name;
+    save(); closeModal(); render(); return toast('Збережено: ' + m.name + ', ' + m.pct + '%');
+  }
+  if (d.mnew) return newMaster();
+  if (d.mcreate) {
+    const name = document.getElementById('nmName').value.trim(), cat = document.getElementById('nmCat').value;
+    const login = document.getElementById('nmLogin').value.trim().toLowerCase();
+    if (!name || !/^[a-z0-9._-]{3,}$/.test(login)) { document.getElementById('nmErr').textContent = "Потрібне ім'я і логін латиницею (від 3 символів)"; return; }
+    if (S.users.some(u => u.login === login)) { document.getElementById('nmErr').textContent = 'Такий логін уже є'; return; }
+    const m = {id: 'm' + Date.now().toString(36), login, salon: document.getElementById('nmSalon').value, name, cat, pct: num('nmPct') || 0, svcs: S.services.filter(s => s.cat === cat).map(s => s.id)};
+    S.masters.push(m); S.users.push({login, name, role: 'master', master: m.id});
+    save(); closeModal(); render(); return toast(`Майстра додано: ${name}, логін ${login}`);
+  }
+  if (d.pay) return openPay(d.pay);
+  if (d.paysave) {
+    const [mid, month] = d.paysave.split('|'), amount = num('pSum');
+    if (!(amount > 0)) return closeModal();
+    S.payouts.push({master: mid, month, amount, ts: new Date().toISOString(), by: S.me});
+    save(); closeModal(); render(); return toast(`Виплачено ${master(mid).name}: ${money(amount)}`);
+  }
+  if (d.adv) return openAdvance();
+  if (d.asave) {
+    const amount = num('aSum'), mid = isMaster() ? myMaster().id : document.getElementById('aMaster').value;
+    if (!(amount > 0)) { document.getElementById('aErr').textContent = 'Вкажіть суму'; return; }
+    const m = master(mid);
+    S.kassa.push({id: 'k' + S.seq.o++, salon: m.salon, type: 'advance', master: mid, amount, ts: new Date().toISOString(), by: S.me, ok: isOwner(), note: document.getElementById('aNote').value.trim()});
+    save(); closeModal(); renderNav(); render(); return toast(`Аванс записано: ${m.name}, ${money(amount)} — Анастасія бачить`);
+  }
+  if (d.kok) { const k = S.kassa.find(x => x.id === d.kok); if (k) k.ok = true; save(); render(); return toast('Аванс погоджено'); }
+  if (d.kcount) return openCount();
+  if (d.cntsave) {
+    const amount = num('cntSum'); if (!(amount >= 0)) return;
+    const exp = kassaState(S.wh).expected;
+    S.kassa.push({id: 'k' + S.seq.o++, salon: S.wh, type: 'count', amount, expected: Math.round(exp * 100) / 100, ts: new Date().toISOString(), by: S.me, note: document.getElementById('cntNote').value.trim()});
+    save(); closeModal(); render(); return toast(Math.abs(amount - exp) < 0.01 ? 'Каса сходиться ✓' : `Різниця: ${money(amount - exp)} — записано в історію каси`);
+  }
+  if (d.take) return openTake();
+  if (d.tksave) {
+    const amount = num('tkSum'); if (!(amount > 0)) return closeModal();
+    S.kassa.push({id: 'k' + S.seq.o++, salon: S.wh, type: 'take', amount, ts: new Date().toISOString(), by: S.me, note: ''});
+    save(); closeModal(); render(); return toast('Записано: забрала ' + money(amount));
+  }
+  if (d.cltab) { ui.clTab = d.cltab; return render(); }
+  if (d.call) return openCall(d.call);
+  if (d.cres) { document.querySelectorAll('[data-cres]').forEach(b => b.classList.toggle('on', b === el)); return; }
+  if (d.csave) {
+    const res = (document.querySelector('[data-cres].on') || {dataset: {}}).dataset.cres || 'booked';
+    S.calls.push({id: 'cl' + Date.now(), client: d.csave, ts: new Date().toISOString(), by: S.me, res, note: document.getElementById('cNote').value.trim()});
+    save(); closeModal(); renderNav(); render(); return toast('Дзвінок записано: ' + CALLRES[res]);
+  }
+  if (d.cl) return openClient(d.cl);
+  if (d.rdone) { const r = S.reqs.find(x => x.id === d.rdone); r.done = {ts: new Date().toISOString(), by: S.me}; save(); renderNav(); render(); return toast('Відмічено: куплено'); }
+  if (el.id === 'doReq') {
+    const r = ui.req;
+    r.text = document.getElementById('rqText').value.trim(); r.qty = document.getElementById('rqQty').value.trim(); r.urgent = document.getElementById('rqUrg').checked;
+    if (!r.item && !r.text) return toast('Виберіть зі списку або напишіть, що треба');
+    S.reqs.push({id: 'r' + Date.now(), salon: isMaster() ? myMaster().salon : S.wh, item: r.item, text: r.text, qty: r.qty, urgent: r.urgent, by: S.me, ts: new Date().toISOString(), done: null});
+    ui.req = {item: '', text: '', qty: '', urgent: false}; save(); renderNav(); render(); return toast('Відправлено — Анастасія побачить');
+  }
+  if (d.rec) { ui.rec = {item: d.rec, packs: 2, sup: '', price: ''}; return go('receipt'); }
+  if (d.rq) { ui.rec.packs = Math.max(0, (parseFloat(ui.rec.packs) || 0) + Number(d.rq)); return render(); }
+  if (el.id === 'doRec') return doReceipt();
+  if (d.pick) {
+    if (d.pick === 'rec') ui.rec = {item: d.v, packs: ui.rec.packs, sup: '', price: ''};
+    if (d.pick === 'req') { ui.req.item = d.v; ui.req.text = (document.getElementById('rqText') || {}).value || ''; ui.req.qty = (document.getElementById('rqQty') || {}).value || ''; }
+    closeCombos(); return render();
+  }
+  if (d.iedit) return editItem(d.iedit);
+  if (d.isave) return saveItem(d.isave);
+  if (d.sedit) return openService(d.sedit);
+  if (d.ssave) return saveService();
+  if (d.smadd) { syncService(); ui.sedit.mats.push({item: S.items[0].id, q: 1}); return renderService(); }
+  if (d.smdel) { syncService(); ui.sedit.mats.splice(+d.smdel, 1); return renderService(); }
+  if (d.copysup) return copyText(orderText(d.copysup), 'Замовлення скопійовано — вставте в повідомлення постачальнику');
+  if (el.id === 'copyAll') return copyText(orderText(''), 'Усе замовлення скопійовано');
+  if (d.log) { ui.logFilter = d.log; return render(); }
+  if (d.close) { ui.sedit = null; return closeModal(); }
+  if (d.more) return openSheet();
+  if (d.logout) return logout();
+  if (d.reset) { closeSheet(); return resetDemo(); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.comboIn) return fillCombo(t.dataset.comboIn, t.value);
+  if (t.id === 'search') { ui.search = t.value; return rerenderKeep('search'); }
+  if (t.id === 'clQ') { ui.clQ = t.value; return rerenderKeep('clQ'); }
+  if (t.id === 'vPhone') { const v = visitDraft(); v.phone = t.value; if (!findClientByPhone(v.salon, t.value.replace(/\D/g, '')) && v.src === 'regular') v.src = ''; return rerenderKeep('vPhone'); }
+  if (t.id === 'vName') { visitDraft().name = t.value; return rerenderKeep('vName'); }
+  if (t.id === 'vPrice') { visitDraft().price = t.value; return rerenderKeep('vPrice'); }
+  if (t.id === 'vNote') { visitDraft().note = t.value; return; }
+  if (t.id === 'rPacks') { ui.rec.packs = t.value; return rerenderKeep('rPacks'); }
+  if (t.id === 'rPrice') { ui.rec.price = t.value; return rerenderKeep('rPrice'); }
+  if (t.id === 'rSup') { ui.rec.sup = t.value; return; }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.smi !== undefined) { syncService(); renderService(); }
+  if (t.id === 'logM') { ui.logMaster = t.value; render(); }
+});
+
+/* ---------- вхід (демо: перевірка в браузері; у робочій версії — на сервері) ---------- */
+const PASSWORD = '2026';
+function enter(login) {
+  S.me = login; save();
+  try { localStorage.setItem(KEY + '-in', login); } catch (e) {}
+  const u = ME();
+  if (u.role === 'master') S.wh = myMaster().salon;
+  if (u.role === 'admin' && S.wh === 'all') S.wh = 'wb';
+  ui.v = null; ui.logMaster = ''; ui.clQ = '';
+  current = u.role === 'owner' ? 'dash' : u.role === 'admin' ? 'visit' : 'me';
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  renderNav(); render(true); window.scrollTo({top: 0});
+}
+function logout() {
+  closeSheet();
+  try { localStorage.removeItem(KEY + '-in'); } catch (e) {}
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('pw').value = ''; document.getElementById('lgErr').textContent = '';
+}
+function resetDemo() { const me = S.me; S = freshState(); S.me = me; if (isMaster()) S.wh = myMaster().salon; ui.v = null; save(); renderNav(); render(true); toast('Демо скинуто: повернулися приклади цифр'); }
+document.getElementById('loginForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const l = document.getElementById('lg').value.trim().toLowerCase(), pw = document.getElementById('pw').value.trim();
+  const err = document.getElementById('lgErr'), form = e.currentTarget, known = S.users.some(u => u.login === l);
+  if (!l || !pw) { err.textContent = 'Введіть логін і пароль'; return; }
+  if (known && pw === PASSWORD) { err.textContent = ''; return enter(l); }
+  err.textContent = known ? 'Невірний пароль' : 'Невірний логін';
+  form.classList.remove('shake'); void form.offsetWidth; form.classList.add('shake');
+});
+document.getElementById('pwEye').addEventListener('click', () => {
+  const pw = document.getElementById('pw'), b = document.getElementById('pwEye'), show = pw.type === 'password';
+  pw.type = show ? 'text' : 'password'; b.classList.toggle('on', show);
+});
+document.getElementById('sheetBg').addEventListener('click', closeSheet);
+document.getElementById('modalBg').addEventListener('click', closeModal);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.getElementById('modal').classList.contains('hidden')) closeModal(); });
+document.getElementById('resetBtn').addEventListener('click', resetDemo);
+
+load();
+(() => { let l = ''; try { l = localStorage.getItem(KEY + '-in') || ''; } catch (e) {} if (l && S.users.some(u => u.login === l)) enter(l); })();
+
+</script>
+</body>
+</html>
